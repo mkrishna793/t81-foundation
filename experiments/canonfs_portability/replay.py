@@ -58,7 +58,7 @@ def main():
                 run = subprocess.run([str(probe),layout,str(inp),str(store)],capture_output=True,timeout=30,
                                      env={k:v for k,v in os.environ.items() if k!='T81_CANONFS_READ_VERIFY'})
                 observation = dict(trial=trial.name,layout=layout,payload_hex=payload.hex(),
-                                   returncode=run.returncode,stdout=run.stdout.decode('utf-8','backslashreplace'),
+                                   returncode=run.returncode,stdout_hex=run.stdout.hex(),stderr_hex=run.stderr.hex(),stdout=run.stdout.decode('utf-8','backslashreplace'),
                                    stderr=run.stderr.decode('utf-8','backslashreplace'),files=snapshot(store))
                 rawlog.write(json.dumps(observation,sort_keys=True)+'\n');rawlog.flush()
                 if run.returncode: raise ValueError('probe failure; raw bytes retained')
@@ -115,6 +115,11 @@ def main():
                         raise ValueError('edge payload not stored')
                 except Exception as error: failures.append(dict(trial=f'edge-{i}',error=str(error)))
     report=dict(platform=platform.platform(),machine=platform.machine(),python=sys.version,
+                git_sha=subprocess.check_output(['git','rev-parse','HEAD'],cwd=HERE.parents[1],text=True).strip(),
+                native_ansi_codepage=ctypes.windll.kernel32.GetACP() if os.name=='nt' else None,
+                source_sha256={str(path.relative_to(HERE.parents[1])):hashlib.sha256(path.read_bytes()).hexdigest()
+                               for path in (HERE/'probe.cpp',HERE/'contract_test.cpp',Path(__file__),
+                                            HERE.parents[1]/'fs/persistent_driver.cpp',HERE.parents[1]/'include/t81/canonfs/storage_mapping.hpp')},
                 historical_archive_sha256=ORIGINAL_SHA256,original_failure_count=100,
                 results=results,failures=failures,
                 legacy_failures=sum(not r['complete'] for r in results if r['layout']=='legacy'),
