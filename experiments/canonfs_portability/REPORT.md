@@ -84,3 +84,31 @@ than falling back to a different authorization namespace. Roots already using th
 new reserved marker name require operator review. Default CLI/import/export remain
 legacy-only, preserving RFC-00D1 result/provenance fixtures. Default switching or
 any copy-migration/cutover needs separately approved compatibility work.
+
+
+## First native run: retained audit failures
+
+At source `3ceee34477003482526209f61e26c9ab51568ace`, native Linux x86_64 and
+macOS ARM64 passed both the corpus and six legacy suites. Native Windows built,
+reproduced 100 legacy storage failures and completed all 110 portable transactions,
+but the expanded audit failed on two assumptions. Its
+[complete first Windows artifact](observed-initial/windows.tar.gz) is retained.
+
+First, a successful Win32 stream open of `CON.blk` can refer to a device without
+creating a directory entry. Requiring a format validator to reject an entry that
+was never created is incorrect. The corrected test enumerates actual entries and
+records stream-open and directory-entry outcomes separately. It still rejects
+all malformed keys and any invalid entry that is actually present; it does not
+skip the reserved-name observation.
+
+Second, the ten remaining legacy API-success cases use code-page-dependent
+mojibake filenames on this Windows host. The original narrow `_open` interprets
+UTF-8 display bytes through its native ANSI code page. The audit retains these
+additional filename mismatches as failures of portable representation, separate
+from the 100 original creation errors. The corrected observer independently
+computes the exact legacy spelling using native `GetACP()`, validates the entire
+file inventory and payload, and also records whether that spelling equals the
+canonical Base81 display. It never reports a noncanonical legacy path as a
+portable success. V2 remains subject to exact canonical-hex path and byte checks
+on every host. This distinction is necessary to reproduce the original write/read
+criteria without erasing the stronger audit's new encoding finding.
