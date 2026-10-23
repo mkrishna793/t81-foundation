@@ -108,7 +108,8 @@ anti-rollback capability protocol is added. Parity remains a placeholder.
 ## Legacy reads and migration
 
 Existing v1 roots remain readable by the legacy factory when their actual
-filenames can be represented without aliasing on the host, the marker is absent,
+filenames can be represented without aliasing under the host encoding used to
+create them (including the legacy Windows ANSI interpretation of UTF-8 bytes), the marker is absent,
 and read verification succeeds. A store already damaged by case folding or
 invalid/missing filenames cannot be repaired by inventing identities or disabling
 verification. Original PR #554 Windows failures remain immutable evidence.

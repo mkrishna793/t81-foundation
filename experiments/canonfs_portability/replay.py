@@ -1,5 +1,6 @@
 """Re-execute PR #554 storage payloads, preserving before/after and every failure."""
 import argparse
+import ctypes
 import hashlib
 import json
 import os
@@ -68,28 +69,38 @@ def main():
                     raise ValueError('created object did not verify/duplicate correctly')
                 if value['written']:
                     path = ('v2/objects/'+digest(payload).hex()+'.blk') if layout=='portable' else 'objects/'+display(payload)+'.blk'
-                    if observation['files'].get(path)!=payload.hex(): raise ValueError('native path/payload mismatch')
+                    value['native_path_exact'] = observation['files'].get(path)==payload.hex()
+                    if layout=='legacy' and os.name=='nt':
+                        codepage=ctypes.windll.kernel32.GetACP()
+                        native_name=display(payload).encode('utf-8').decode(f'cp{codepage}')
+                        native_path='objects/'+native_name+'.blk'
+                        if observation['files']!={native_path:payload.hex()}:
+                            raise ValueError('legacy native-codepage path/payload mismatch')
+                        value['native_codepage']=codepage
+                    elif not value['native_path_exact']:
+                        raise ValueError('native path/payload mismatch')
                     if layout=='portable' and observation['files'].get('canonfs-layout')!=b't81.canonfs.storage-map.v2\n'.hex():
                         raise ValueError('portable format marker mismatch')
                     if layout=='portable' and set(observation['files'])!={'canonfs-layout',path}:
                         raise ValueError('unexpected portable file inventory')
-                return value['written']
+                return value
             for layout in ('legacy','portable'):
                 for row in rows:
                     trial_id = f"{row['case']}-A-{row['repetition']}"
                     try:
                         committed = bool(row['bundle']['record']['payload_sha256'])
-                        po_ok = True
+                        po = dict(written=True,native_path_exact=True)
                         if committed:
                             payload = bytes.fromhex(next(iter(row['protected_files'].values())))
-                            po_ok = run_one(layout,payload,args.output/f'{layout}-{trial_id}-po')
-                        archive_ok = False
-                        if po_ok:
+                            po = run_one(layout,payload,args.output/f'{layout}-{trial_id}-po')
+                        evidence_result = dict(written=False,native_path_exact=False)
+                        if po['written']:
                             evidence = bytes.fromhex(next(iter(row['evidence_files'].values())))
-                            archive_ok = run_one(layout,evidence,args.output/f'{layout}-{trial_id}-evidence')
-                        complete = po_ok and archive_ok
+                            evidence_result = run_one(layout,evidence,args.output/f'{layout}-{trial_id}-evidence')
+                        complete = po['written'] and evidence_result['written']
                         result = dict(layout=layout,original_trial=trial_id,complete=complete,
-                                      originally_failed=trial_id in failed)
+                                      originally_failed=trial_id in failed,
+                                      canonical_path_exact=complete and po.get('native_path_exact',False) and evidence_result.get('native_path_exact',False))
                         results.append(result)
                         if layout=='portable' and not complete: raise ValueError('portable corpus failed')
                         if layout=='legacy' and platform.system()=='Windows' and complete==(trial_id in failed):
@@ -100,7 +111,7 @@ def main():
                         failures.append(dict(layout=layout,trial=trial_id,error=str(error)))
             for i,payload in enumerate((b'',b'\0\xff\x80\n',bytes(range(256)),b'x'*65536)):
                 try:
-                    if not run_one('portable',payload,args.output/f'edge-{i}'):
+                    if not run_one('portable',payload,args.output/f'edge-{i}')['written']:
                         raise ValueError('edge payload not stored')
                 except Exception as error: failures.append(dict(trial=f'edge-{i}',error=str(error)))
     report=dict(platform=platform.platform(),machine=platform.machine(),python=sys.version,
@@ -108,6 +119,7 @@ def main():
                 results=results,failures=failures,
                 legacy_failures=sum(not r['complete'] for r in results if r['layout']=='legacy'),
                 portable_complete=sum(r['complete'] for r in results if r['layout']=='portable'),
+                legacy_completed_noncanonical_paths=sum(r['complete'] and not r['canonical_path_exact'] for r in results if r['layout']=='legacy'),
                 probe_sha256=hashlib.sha256(probe.read_bytes()).hexdigest())
     (args.output/'report.json').write_text(json.dumps(report,indent=2,sort_keys=True)+'\n',encoding='utf-8')
     print(json.dumps({k:v for k,v in report.items() if k not in ('results','python')}))

@@ -95,11 +95,11 @@ int main(int argc, char** argv) {
     rejects([&] { make_persistent_driver(root); });
     require(!fs::exists(root / "objects"), "legacy factory mutated v2");
     // Real disk corruption is detected even with a previously successful read.
-    put(path, "partial");
+    put(path, payload.substr(0, 3));
     require(!d->read_object_bytes(*ref), "warm read hid corruption");
     require(!d->write_object(ObjectType::RawBlock, bytes(payload)),
             "duplicate repaired/overwrote corrupt bytes");
-    require(get(path) == "partial", "corruption evidence overwritten");
+    require(get(path) == payload.substr(0, 3), "corruption evidence overwritten");
     put(path, payload + "extra");
     require(!d->read_object_bytes(*ref), "appended corruption accepted");
     put(path, payload);
@@ -170,14 +170,22 @@ int main(int argc, char** argv) {
     fs::remove(root / "objects");
     const auto malformed = root / "v2" / "objects" / "CON.blk";
     std::ofstream invalid_name(malformed, std::ios::binary);
-    if (invalid_name) {
-      invalid_name.close();
+    const bool opened_reserved = bool(invalid_name);
+    invalid_name.close();
+    bool reserved_entry = false;
+    for (const auto& entry : fs::directory_iterator(malformed.parent_path()))
+      if (entry.path().filename() == malformed.filename()) reserved_entry = true;
+    std::cout << "{\"reserved_name_opened\":" << opened_reserved
+              << ",\"reserved_directory_entry\":" << reserved_entry << "}\n";
+    if (reserved_entry) {
       rejects([&] { make_portable_persistent_driver(root); });
       fs::remove(malformed);
     } else {
-      require(!fs::exists(malformed), "invalid native name produced a file");
+      // Win32 may open a reserved device without creating any directory entry.
+      // The format validator must judge the actual directory, not stream state.
+      require(!parse_portable_storage_key("CON"), "reserved key accepted");
+      require(make_portable_persistent_driver(root) != nullptr, "device probe damaged the store");
     }
-
     const auto alias = root / "v2" / "objects" / (std::string(64, 'A') + ".blk");
     put(alias, "x");
     rejects([&] { make_portable_persistent_driver(root); });
@@ -197,6 +205,21 @@ int main(int argc, char** argv) {
     } else {
       std::cout << "{\"symlink_creation\":\"unavailable\",\"native_error\":" << link_error.value()
                 << "}\n";
+    }
+    const auto device_root = base / "device-display-identities";
+    auto device_store = make_portable_persistent_driver(device_root);
+    for (const std::string name : {"CON", "PRN", "AUX", "NUL", "COM1", "COM9", "LPT1", "LPT9"}) {
+      CapabilityGrant device_grant{};
+      device_grant.target = CanonRef{CanonHash{t81::hash::CanonHash81::from_string(name)}};
+      device_grant.perms = CANON_PERM_READ;
+      const auto device_key = portable_storage_key(device_grant.target.hash);
+      require(device_store->publish_capability(device_grant).has_value(),
+              "device-display capability create");
+      require(get(device_root / "v2" / "caps" / (device_key + ".cap")) == "1\n",
+              "device-display native path");
+      auto missing = device_store->read_object_bytes(device_grant.target);
+      require(!missing && missing.error() == Error::NotFound,
+              "device-display lookup escaped storage");
     }
     // The key stays constant even when root paths differ in space/Unicode/case.
     const auto second = base / "Other Root";

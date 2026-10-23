@@ -50,7 +50,9 @@ jobs:
             ./portable-build/t81_canonfs_legacy_${contract} 2>&1 | tee "legacy-${contract}.log"
           done
       - name: Exact identity and compatibility contracts
-        run: ./portable-build/t81_canonfs_portable_contract_test contract-output 2>&1 | tee contract.log
+        run: |
+          ./portable-build/t81_canonfs_portable_contract_test contract-output 2>&1 | tee contract.log
+          T81_CANONFS_READ_VERIFY=0 ./portable-build/t81_canonfs_portable_contract_test contract-diagnostics-output 2>&1 | tee contract-diagnostics.log
       - name: Reproduce original corpus and portable replacement
         if: always()
         run: python experiments/canonfs_portability/replay.py --probe portable-build/t81_canonfs_portability_probe --output replay-output 2>&1 | tee replay.log
@@ -61,7 +63,7 @@ jobs:
           from pathlib import Path
           import tarfile
           with tarfile.open('canonfs-portability.tar.gz','w:gz') as out:
-              for entry in [Path('replay-output'),Path('contract-output'),*Path('.').glob('*.log')]:
+              for entry in [Path('replay-output'),Path('contract-output'),Path('contract-diagnostics-output'),*Path('.').glob('*.log')]:
                   if entry.exists(): out.add(entry,arcname=entry.name)
           PY
       - uses: actions/upload-artifact@v4
