@@ -4,15 +4,21 @@
 **Location:** `experiments/research_001/NEGATIVE_CONTROLS.md`
 **Author:** T81 Foundation Research Group
 **Date:** April 2026
+**Version:** v1.1.0 (Corrected Specification)
 **Status:** Approved Experimental Controls
 
 ---
 
-## 1. Purpose
+## 1. Purpose & Threat Taxonomy
 
 Negative controls are essential experimental calibrations that prove the sensitivity, correctness, and fail-closed security of both the target execution systems (T81 and Conventional Baseline) and the independent verification tools.
 
 A negative control introduces a deliberate fault, corruption, or policy violation into the execution pipeline or evidence bundle. An experimental harness or verifier that fails to detect a negative control is declared compromised or defective.
+
+Fault injections are classified into three distinct threat categories and trust boundaries:
+1. **Malformed Evidence Artifacts (Evidence Boundary):** Tampering with serialized evidence, formatting, keys, or hashes after execution completed.
+2. **Malicious Guest Execution (Guest Boundary):** Attempting unauthorized operations or limit bypasses from within the sandboxed workload code.
+3. **Malicious Host / Infrastructure Behavior (Host Boundary):** Tampering with policy evaluation state, host FFI return handles, or system clocks outside guest code execution.
 
 ---
 
@@ -22,46 +28,56 @@ A negative control introduces a deliberate fault, corruption, or policy violatio
 +-----------------------------------------------------------------------------------+
 |                           NEGATIVE CONTROLS MATRIX                                |
 |                                                                                   |
-| Control ID  | Fault Injected                      | Expected Target Outcome       |
-| ----------- | ----------------------------------- | ----------------------------- |
-| NC-01       | Non-canonical JSON formatting       | Hash mismatch / Verification  |
-| NC-02       | Un-sandboxed host file write        | Intercept breach / Policy DENY|
-| NC-03       | Un-hashed state mutation            | Replay trace hash divergence |
-| NC-04       | Forged cryptographic signature      | Signature verification FAIL  |
-| NC-05       | Tampered input payload digest       | Digest mismatch FAIL          |
-| NC-06       | Over-limit purchase order           | Pre-side-effect Policy DENY   |
-| NC-07       | Stale policy evaluation timestamp  | Time-window policy DENY       |
+| Control ID | Fault Category     | Fault Injected             | Expected Outcome   |
+| ---------- | ------------------ | -------------------------- | ------------------ |
+| NC-01      | Malformed Evidence | Non-canonical key order    | Digest mismatch    |
+| NC-01B     | Malformed Evidence | Invalid JSON syntax        | Syntax error FAIL  |
+| NC-02      | Malicious Guest    | Direct host file write     | Syscall/FFI DENY   |
+| NC-03      | Malicious Guest    | Un-recorded state mutation | Trace hash divergence|
+| NC-04      | Malformed Evidence | Forged signature byte      | Signature FAIL     |
+| NC-05      | Malformed Evidence | Tampered input payload     | Input digest FAIL  |
+| NC-06      | Malicious Guest    | Over-limit purchase order  | Pre-commit Policy DENY|
+| NC-07      | Malicious Host     | Stale evaluation timestamp | Revocation DENY    |
+| NC-08      | Malicious Host     | Tampered FFI return handle | Fail-closed DENY   |
 +-----------------------------------------------------------------------------------+
 ```
 
 ---
 
-## 3. Control Specifications & Expected Behaviors
+## 3. Control Specifications & Trust Boundary Audit
 
-### Control NC-01: Non-Canonical Serialization
-- **Fault Injected:** Evidence bundle key order is mutated or whitespace/formatting changes are introduced (violating RFC 8785 JSON Canonicalization Scheme).
-- **Expected System Outcome:** Offline verifier recomputing evidence digest MUST generate a different hash string. Verification fails with error code `ERR_CANONICAL_HASH_MISMATCH`.
+### Control NC-01: Non-Canonical Serialization Key Order (Evidence Boundary)
+- **Fault Injected:** Evidence bundle JSON keys are reordered (e.g. `{"b": 1, "a": 2}`) without violating JSON syntax grammar, violating RFC 8785 JSON Canonicalization Scheme (JCS).
+- **Expected Outcome:** Standalone offline verifier recomputing RFC 8785 digest MUST generate a different SHA256 string. Verification fails with error code `ERR_CANONICAL_HASH_MISMATCH`.
 
-### Control NC-02: Direct Un-sandboxed Host File Creation
+### Control NC-01B: Malformed JSON Syntax (Evidence Boundary)
+- **Fault Injected:** A trailing comma or unescaped control character is inserted into the serialized evidence file (`{"meaning": ... ,}`).
+- **Expected Outcome:** Standalone verifier parser fails JSON syntax validation. Verification fails with error code `ERR_JSON_SYNTAX_ERROR`.
+
+### Control NC-02: Direct Un-sandboxed Host File Creation (Guest Boundary)
 - **Fault Injected:** Execution module attempts to write a purchase order directly to `/tmp/unauthorized_po.txt` bypassing CanonFS / SQLite content-addressed storage interface.
-- **Expected System Outcome:** Host FFI sandbox / Axion policy kernel MUST catch the unauthorized syscall or un-imported capability, immediately terminate execution process, and emit `ERR_UNAUTHORIZED_SIDEEFFECT`. Zero bytes written to disk.
+- **Expected Outcome:** Host FFI sandbox / Axion policy kernel MUST catch the unauthorized syscall or un-imported capability, immediately terminate execution process, and emit `ERR_UNAUTHORIZED_SIDEEFFECT`. Zero bytes written to disk.
 
-### Control NC-03: Un-hashed State Mutation
+### Control NC-03: Un-hashed State Mutation (Guest Boundary)
 - **Fault Injected:** Execution module modifies internal memory register state during calculation without emitting an instruction/trace hash event.
-- **Expected System Outcome:** Final trace hash verification recomputed from execution trace log fails to match `evidence.execution_trace_hash`. Verification fails with `ERR_TRACE_DIVERGENCE`.
+- **Expected Outcome:** Final trace hash verification recomputed from execution trace log fails to match `evidence.execution_trace_hash`. Verification fails with `ERR_TRACE_DIVERGENCE`.
 
-### Control NC-04: Forged Cryptographic Signature
+### Control NC-04: Forged Cryptographic Signature (Evidence Boundary)
 - **Fault Injected:** A single byte of the base64-encoded signature in `accountability.signature` is flipped.
-- **Expected System Outcome:** Verifier signature check fails with `ERR_SIGNATURE_INVALID`. Evidence bundle rejected as untrusted.
+- **Expected Outcome:** Verifier signature check fails with `ERR_SIGNATURE_INVALID`. Evidence bundle rejected as untrusted.
 
-### Control NC-05: Tampered Input Payload Digest
+### Control NC-05: Tampered Input Payload Digest (Evidence Boundary)
 - **Fault Injected:** The input payload JSON parameter `quantity` is modified from $100$ to $500$ after bundle generation, while `evidence.input_digest` remains unchanged.
-- **Expected System Outcome:** Verifier recomputing SHA256 of `meaning.parameters` detects mismatch with `evidence.input_digest`. Verification fails with `ERR_INPUT_DIGEST_MISMATCH`.
+- **Expected Outcome:** Verifier recomputing SHA256 of `meaning.parameters` detects mismatch with `evidence.input_digest`. Verification fails with `ERR_INPUT_DIGEST_MISMATCH`.
 
-### Control NC-06: Over-Limit Purchase Order
+### Control NC-06: Over-Limit Purchase Order (Guest Boundary)
 - **Fault Injected:** Workload input parameters produce total purchase order value $V = \$35,000$ when spending limit $L = \$25,000$.
-- **Expected System Outcome:** Both T81VM and Wasmtime runtime policy engines MUST evaluate verdict as `DENY`. Output storage write MUST NOT be attempted. Output bundle must record `authority.verdict == DENY`.
+- **Expected Outcome:** Both T81VM and Wasmtime runtime policy engines MUST evaluate verdict as `DENY`. Output storage write MUST NOT be attempted. Output bundle must record `authority.verdict == DENY`.
 
-### Control NC-07: Stale Policy Evaluation
-- **Fault Injected:** Bundle records policy verdict evaluated at timestamp $T - 2$ hours, where policy revocation occurred at $T - 1$ hour.
-- **Expected System Outcome:** Verifier checks policy timestamp against revocation window and rejects bundle with `ERR_POLICY_REVOKED`.
+### Control NC-07: Stale Policy Evaluation Timestamp (Host Boundary)
+- **Fault Injected:** Host runtime records policy verdict evaluated at timestamp $T - 2$ hours, where policy revocation occurred at $T - 1$ hour.
+- **Expected Outcome:** Verifier checks policy timestamp against revocation window and rejects bundle with `ERR_POLICY_REVOKED`.
+
+### Control NC-08: Tampered FFI Return Handle (Host Boundary)
+- **Fault Injected:** A compromised host FFI layer attempts to return a success code (`0`) to guest Wasm memory when policy evaluation returned `DENY`.
+- **Expected Outcome:** Pre-commit storage boundary validates host signed verdict object before committing payload blob. Storage engine detects missing `ALLOW` signature and aborts with `ERR_HOST_FFI_VERDICT_MISMATCH`.

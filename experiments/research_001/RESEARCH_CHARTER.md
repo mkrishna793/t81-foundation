@@ -1,6 +1,7 @@
 # T81 Experimental Research Charter: Research Protocol 001
 
 **Date:** April 2026
+**Version:** v1.1.0 (Corrected Specification)
 **Status:** Active Research Governance Directive
 **Location:** `experiments/research_001/RESEARCH_CHARTER.md`
 
@@ -47,8 +48,8 @@ Claims derived from experimental outcomes MUST be bounded strictly to the domain
 - Passing a synthetic integer workload test MUST NOT be generalized into claims of general OS superiority or floating-point determinism.
 - Empirical advantages observed on one target architecture (e.g., x86_64 AVX2) MUST NOT be asserted for other target architectures (e.g., ARM64 or RISC-V) without direct experimental measurement.
 
-### 2.7 Stopping Discipline
-Every experiment MUST operate under predefined stopping criteria and sample size bounds ($N \ge 30$). Experimental runs MUST terminate immediately upon reaching predefined confidence intervals or falsification thresholds. Iterating tests selectively until a desired result is achieved ("p-hacking" or benchmark overfitting) is forbidden.
+### 2.7 Stopping Discipline & Statistical Validity
+Every experiment MUST operate under predefined stopping criteria, explicit statistical confidence intervals, and minimum sample size bounds ($N \ge 30$). Experimental runs MUST terminate immediately upon reaching predefined statistical confidence thresholds or falsification conditions. Iterating tests selectively until a desired result is achieved ("p-hacking" or benchmark overfitting) is forbidden. Zero observed failures in $N=30$ trials yield a Clopper-Pearson 95% upper confidence bound of $\le 9.50\%$ failure rate; expanded testing ($N=300$) is required to bound zero-failure rates to $\le 0.99\%$.
 
 ---
 
@@ -56,4 +57,25 @@ Every experiment MUST operate under predefined stopping criteria and sample size
 
 1. **Production Code Immutability:** Research Protocol 001 is a research-design and empirical evaluation protocol. It DOES NOT modify production implementations (`src/`, `include/t81/`), frozen ISAs (`spec/tisc/`), or existing operational contracts (`RFC-0054`, `RFC-0002`).
 2. **Experimental Isolation:** All protocol specifications, baseline models, negative controls, measurement plans, and evidence manifests reside strictly within `experiments/research_001/`.
-3. **Pivoting Authority:** If experimental results establish Outcome B (Conventional Equivalence) or Outcome C (Environmental Dependence) under the predefined stopping criteria, the T81 Foundation will formally pivot architectural investment toward lightweight protocol standards (e.g., RFC-00D4 Accountable Decision Bundles) without requirement to complete unproven VM or ISA components.
+3. **Restricted Pivoting Scope:** If experimental results establish Outcome B (Conventional Equivalence) or Outcome C (Environmental Dependence) under the predefined stopping criteria, conclusions and engineering pivots MUST be restricted strictly to the evaluated workload and measured security/performance guarantees. Automatic ecosystem-wide architectural pivots are forbidden; broader changes require separate empirical research and explicit review.
+
+---
+
+## 4. Methodological Traceability & Defect Resolution Matrix
+
+The following table maps all methodological corrections made under this protocol update to their affected documents, corrective actions, and verification methods:
+
+| Defect ID | Summary Description | Affected Documents | Corrective Action Taken | Validation Method |
+| :--- | :--- | :--- | :--- | :--- |
+| **DEF-01** | NC-01 JSON canonicalization vs syntax error conflation. | `NEGATIVE_CONTROLS.md` | Separated valid JSON key-reordering (`ERR_CANONICAL_HASH_MISMATCH`) from malformed JSON syntax errors (`ERR_JSON_SYNTAX_ERROR`). | Synthetic JSON unit tests in `verify.py`. |
+| **DEF-02** | Ed25519 verification dependency unspecified in Python stdlib. | `BASELINE_SPECIFICATION.md`, `REPRODUCIBILITY.md` | Specified Python `cryptography` package as explicit external dependency with stdlib HMAC-SHA256 fallback option. | Dependency check in `verify.py`. |
+| **DEF-03** | Contradictory Outcome B latency/complexity thresholds ($2\times$ vs $5\times$). | `HYPOTHESES.md`, `STOPPING_CRITERIA.md`, `RESEARCH_PROPOSAL.md` | Harmonized threshold: Arm (iii) achieves equal or lower decision latency and $\ge 5\times$ lower host runtime LOC footprint. | Cross-document consistency review. |
+| **DEF-04** | Negative controls lacked clear fault taxonomy and trust boundaries. | `NEGATIVE_CONTROLS.md` | Classified controls into Malformed Evidence, Malicious Guest Behavior, and Malicious Host Behavior; added NC-08 host boundary control. | Control matrix audit. |
+| **DEF-05** | Hypotheses H1, H2, H3 presented as mutually exclusive. | `HYPOTHESES.md`, `RESEARCH_PROPOSAL.md` | Reframed H1, H2, H3 as nonexclusive explanatory models; added explicit reporting rules for mixed/inconclusive outcomes. | Hypothesis logic review. |
+| **DEF-06** | Automatic ecosystem-wide architectural pivots in stopping criteria. | `STOPPING_CRITERIA.md`, `RESEARCH_CHARTER.md` | Restricted conclusions and pivots strictly to evaluated workload; required separate research for broader ecosystem shifts. | Governance scope review. |
+| **DEF-07** | Unresolved design: OPA IPC overhead vs in-process execution. | `BASELINE_SPECIFICATION.md`, `EXPERIMENT_PROTOCOL.md` | Primary Arm (iii) uses in-process OPA C/Rust library; sidecar IPC evaluated as secondary measurement. | Harness execution flag check. |
+| **DEF-08** | Unresolved design: Mid-flight revocation hook mechanism. | `EXPERIMENT_PROTOCOL.md`, `BASELINE_SPECIFICATION.md` | Injected explicit synchronous `post_calc_pre_commit` callback hook in workload dispatch sequence. | Revocation sequence trace audit. |
+| **DEF-09** | Unresolved design: Evidence format canonicalization bias. | `BASELINE_SPECIFICATION.md`, `MEASUREMENT_PLAN.md` | Standardized primary benchmarks on common RFC 8785 JCS JSON; recorded native formats as secondary metrics. | Verification pipeline check. |
+| **DEF-10** | Unverified claims regarding RFC-00D4 standards status. | All documents | Labeled RFC-00D4 accurately as an internal experimental specification draft proposal (`spec/rfcs/RFC-00D4-accountable-decision-bundle.md`). | Documentation search audit. |
+| **DEF-11** | $N=30$ sample size claimed zero failure probability. | `MEASUREMENT_PLAN.md`, `EXPERIMENT_PROTOCOL.md` | Added Clopper-Pearson 95% confidence bounds ($N=30 \le 9.50\%$, $N=300 \le 0.99\%$), $CI_{95}$, and non-parametric hypothesis tests. | Statistical formula validation. |
+| **DEF-12** | Inconsistent dates, versions, cross-references, and terms. | All documents | Normalized all metadata to April 2026, Version v1.1.0, and standardized cross-file link references. | Document audit. |

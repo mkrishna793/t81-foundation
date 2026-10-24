@@ -4,13 +4,14 @@
 **Location:** `experiments/research_001/EXPERIMENT_PROTOCOL.md`
 **Author:** T81 Foundation Research Group
 **Date:** April 2026
+**Version:** v1.1.0 (Corrected Specification)
 **Status:** Approved Experimental Specification
 
 ---
 
 ## 1. Overview
 
-This document specifies the step-by-step experimental execution protocol for comparing **Arm (i)** (Conventional Baseline: Python + OPA), **Arm (ii)** (Current T81 Substrate: T81VM + Axion + CanonFS), and **Arm (iii)** (Lightweight Alternative: Wasmtime + SQLite + RFC-00D4 ADB).
+This document specifies the step-by-step experimental execution protocol for comparing **Arm (i)** (Conventional Baseline: Python + OPA), **Arm (ii)** (Current T81 Substrate: T81VM + Axion + CanonFS), and **Arm (iii)** (Lightweight Alternative: Wasmtime + SQLite + internal RFC-00D4 draft ADB).
 
 ---
 
@@ -28,9 +29,9 @@ Both systems under test MUST execute the standardized **Inventory Replenishment 
 
 ---
 
-## 3. Adversarial Threat Scenarios
+## 3. Adversarial Threat Scenarios & Design Resolutions
 
-The experimental protocol subjects both systems to four explicit threat scenarios:
+The experimental protocol subjects all systems to four explicit threat scenarios:
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -50,17 +51,17 @@ The experimental protocol subjects both systems to four explicit threat scenario
 - **Attack Vector:** Supplier quote payload contains manipulated parameter strings attempting to override unit price calculations or bypass policy rule matches.
 - **Requirement:** System MUST parse untrusted input into canonical schema, isolate calculation from policy context, and fail-closed with 0.0% unauthorized purchases.
 
-### Scenario 2: Mid-Flight Policy Revocation
+### Scenario 2: Mid-Flight Policy Revocation (Synchronous Hook Resolution)
 - **Attack Vector:** An administrator revokes the spending capability ($L$ reduced from $\$25,000$ to $\$5,000$) *after* the purchase order calculation completes but *before* the storage write side effect is committed.
-- **Requirement:** System MUST re-evaluate or enforce policy atomically prior to side-effect commit. Any system committing a purchase order $> \$5,000$ post-revocation suffers a policy breach.
+- **Design Resolution:** To eliminate asynchronous timing jitter, all arms expose an explicit synchronous `post_calc_pre_commit` hook in the workload dispatch loop. In Arm (iii), the hook updates the in-process OPA policy context immediately before calling `host_eval_policy`. Any system committing a purchase order $> \$5,000$ post-revocation suffers a policy breach.
 
 ### Scenario 3: Corrupted / Stale Provenance Injection
 - **Attack Vector:** An attacker alters the inventory history record or supplier quote hash in the evidence bundle after execution.
 - **Requirement:** Independent verifier recomputing input digests MUST detect the mismatch and reject the bundle as untrusted (`VERIFICATION_FAILED`).
 
-### Scenario 4: Detached Offline Audit Challenge
+### Scenario 4: Detached Offline Audit Challenge (Common Evidence Resolution)
 - **Attack Vector:** An auditor with zero network access and no access to the producer runtime must verify compliance using only the exported evidence bundle and public key.
-- **Requirement:** Verifier MUST complete schema validation, signature verification, and trace replay in $<1,000$ ms with 100% agreement.
+- **Design Resolution:** Primary comparative benchmarks evaluate evidence exported strictly in RFC 8785 Canonical JSON (JCS) format conforming to the internal `spec/rfcs/RFC-00D4-accountable-decision-bundle.md` draft schema. Native secondary representations (e.g., custom Base81 trytes) are recorded as secondary metrics to isolate serialization overhead.
 
 ---
 
@@ -72,11 +73,11 @@ The experimental protocol subjects both systems to four explicit threat scenario
 - Ensure output directories reside on a RAM disk (`tmpfs`) to isolate compute latency from physical disk IO latency.
 
 ### Step 2: Test Case Matrix Execution
-Execute 8 test cases per arm in rotating order for $N = 30$ iterations:
+Execute 8 test cases per arm in rotating order for $N = 30$ iterations (primary run) and $N = 300$ iterations (expanded verification run):
 1. `case_01_allow`: Standard compliant purchase order ($V = \$15,000 \le L$).
 2. `case_02_over_limit_deny`: Over-limit purchase order ($V = \$35,000 > L$).
 3. `case_03_injection_attack`: Manipulated payload input.
-4. `case_04_midflight_revocation`: Spending limit revoked mid-flight.
+4. `case_04_midflight_revocation`: Spending limit revoked mid-flight via `post_calc_pre_commit` hook.
 5. `case_05_corrupted_input_hash`: Tampered input hash in evidence.
 6. `case_06_corrupted_trace_hash`: Tampered execution trace hash in evidence.
 7. `case_07_invalid_signature`: Invalid cryptographic signature.
@@ -89,5 +90,5 @@ Execute 8 test cases per arm in rotating order for $N = 30$ iterations:
 - Record raw measurements directly into `report.json`.
 
 ### Step 4: Independent Detached Verification
-- Invoke standalone verification script (`verify.py`) against exported evidence bundles.
+- Invoke standalone verification script (`verify.py`) against exported evidence bundles using Python 3.12 stdlib + `cryptography` package.
 - Confirm agreement of execution state, policy verdict, and output hashes without importing producer libraries.

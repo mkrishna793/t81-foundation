@@ -4,6 +4,7 @@
 **Location:** `experiments/research_001/REPRODUCIBILITY.md`
 **Author:** T81 Foundation Research Group
 **Date:** April 2026
+**Version:** v1.1.0 (Corrected Specification)
 **Status:** Approved Reproducibility Contract
 
 ---
@@ -64,7 +65,8 @@ To balance complete scientific auditability with repository cleanliness:
             "wasmtime": { "type": "string" },
             "opa": { "type": "string" },
             "sqlite": { "type": "string" },
-            "python": { "type": "string" }
+            "python": { "type": "string" },
+            "cryptography": { "type": "string" }
           }
         }
       }
@@ -103,8 +105,8 @@ An independent evaluator MUST be able to re-execute the experiment on a clean ho
 
 ### Step 1: Environment & Dependency Verification
 ```bash
-# Verify system dependencies and Python 3.12 environment
-python3 --version
+# Verify system dependencies and Python 3.12 environment with cryptography package
+python3 -c "import cryptography; print(cryptography.__version__)"
 cmake --version
 ninja --version
 ```

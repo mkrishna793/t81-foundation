@@ -4,6 +4,7 @@
 **Location:** `experiments/research_001/MEASUREMENT_PLAN.md`
 **Author:** T81 Foundation Research Group
 **Date:** April 2026
+**Version:** v1.1.0 (Corrected Specification)
 **Status:** Approved Measurement Plan
 
 ---
@@ -25,24 +26,28 @@ This document specifies the measurement methods, statistical treatment, hardware
 | **Determinism** | Cross-Platform Output Agreement | % | Percentage of identical bit-exact bundle digests across x86_64 and ARM64 | Must be **100.0%** |
 | **Efficiency** | Peak Memory Footprint (RSS) | KB | Maximum Resident Set Size during execution run | Lower is better |
 | **Efficiency** | Evidence Bundle Size | Bytes | Size of canonical serialized JSON evidence bundle | Lower is better |
-| **Complexity** | System Codebase Complexity | LOC | Total lines of code in runtime engine + policy interceptor | Lower is better |
+| **Complexity** | Host Runtime Complexity | LOC | Total lines of C/C++ code in host virtual machine runtime + policy kernel | Lower is better |
 | **Complexity** | Dependency Footprint | MB | Disk size of external binary dependencies and libraries | Lower is better |
 
 ---
 
-## 3. Statistical Treatment & Sample Size
+## 3. Statistical Treatment, Confidence Intervals & Sample Size
 
-To adhere to the **Stopping Discipline Principle** (Charter §2.7):
+To adhere to the **Stopping Discipline Principle** ([RESEARCH_CHARTER.md](RESEARCH_CHARTER.md) §2.7):
 
-1. **Sample Size:** Every test case MUST be executed for $N \ge 30$ independent repetitions per system arm per hardware platform.
+1. **Sample Size & Binomial Confidence Bounds:**
+   - Every primary test case MUST be executed for $N = 30$ independent repetitions per system arm per hardware platform.
+   - **Binomial Failure Rate Bound:** Observing zero failures in $N = 30$ trials establishes a Clopper-Pearson 95% upper confidence limit of **9.50%** failure rate ($p \le 0.0950$).
+   - **Expanded Verification Run:** To bound the zero-failure probability to $\le 1.0\%$, safety test cases (`case_01` through `case_04`) MUST undergo an expanded execution run of $N = 300$ trials, yielding a Clopper-Pearson 95% upper bound of **0.99%** failure rate ($p \le 0.0099$).
 2. **Warmup Iterations:** Each execution process MUST run 5 unmeasured warmup iterations prior to recording metrics to purge cold JIT page faults and cache misses.
-3. **Reported Statistics:** For every continuous numeric metric (Latency, Memory, Verification Time, Bundle Size), the measurement runner MUST compute and record:
+3. **Reported Continuous Statistics:** For every continuous numeric metric (Latency, Memory, Verification Time, Bundle Size), the measurement runner MUST compute and record:
    - Arithmetic Mean ($\mu$)
    - Median ($Q_2$)
    - Standard Deviation ($\sigma$)
    - Minimum ($P_0$) and Maximum ($P_{100}$)
-   - 95% Confidence Interval ($CI_{95}$)
-4. **Outlier Policy:** Raw timing samples exceeding $3\sigma$ from the mean MUST be preserved in the raw measurement register in `report.json` and tagged as `OUTLIER_PRESERVED`. Trimming raw data is forbidden.
+   - 95% Confidence Interval ($CI_{95}$) derived via Student's t-distribution or bootstrap resampling.
+4. **Hypothesis Testing for Continuous Metrics:** Comparisons between latency means MUST report $p$-values using Welch's two-sample t-test (for normally distributed samples) or Mann-Whitney U test (for non-normal distributions). If $p > 0.05$ or $\frac{|\mu_A - \mu_B|}{CI_{95\_max}} < 1.0$, the difference MUST be reported as inconclusive (see [HYPOTHESES.md](HYPOTHESES.md) §5).
+5. **Outlier Policy:** Raw timing samples exceeding $3\sigma$ from the mean MUST be preserved in the raw measurement register in `report.json` and tagged as `OUTLIER_PRESERVED`. Trimming raw data is forbidden.
 
 ---
 

@@ -172,11 +172,7 @@ bool T81DirectAPI::load_model_cached(const std::string& path) {
   try {
     // Load model using T81 weights API
     auto model_file = t81::weights::load_t81w(path);
-    if (!model_file.has_value()) {
-      return false;
-    }
-
-    cached_model_ = model_file.value();
+    cached_model_ = model_file.native;
     cached_model_path_ = path;
 
     std::cout << "✅ Model loaded and cached: " << path << std::endl;
@@ -276,9 +272,8 @@ T81DirectAPI::Stats T81DirectAPI::get_stats() const { return stats_; }
 void T81DirectAPI::reset_stats() { stats_ = Stats{}; }
 
 // Factory function
-std::unique_ptr<T81DirectAPI> create_direct_api(const DirectAPIConfig& config) {
+std::unique_ptr<T81DirectAPI> create_direct_api(const DirectAPIConfig& /* config */) {
   auto api = std::make_unique<T81DirectAPI>();
-  // Configuration will be set during initialize()
   return api;
 }
 
