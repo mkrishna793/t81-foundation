@@ -1964,6 +1964,7 @@ set(T81_INSTALL_TARGETS
   t81_llvm
   t81_mlir
   t81_tool_cli
+  t81_decode
   t81
 )
 if(TARGET t81_dmath_runtime)
