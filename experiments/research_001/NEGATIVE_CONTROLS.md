@@ -30,7 +30,7 @@ Fault injections are classified into three distinct threat categories and trust 
 |                                                                                   |
 | Control ID | Fault Category     | Fault Injected             | Expected Outcome   |
 | ---------- | ------------------ | -------------------------- | ------------------ |
-| NC-01      | Malformed Evidence | Non-canonical key order    | Digest mismatch    |
+| NC-01      | Malformed Evidence | Non-canonical key order    | Canonical bytes FAIL |
 | NC-01B     | Malformed Evidence | Invalid JSON syntax        | Syntax error FAIL  |
 | NC-02      | Malicious Guest    | Direct host file write     | Syscall/FFI DENY   |
 | NC-03      | Malicious Guest    | Un-recorded state mutation | Trace hash divergence|
@@ -49,9 +49,11 @@ Fault injections are classified into three distinct threat categories and trust 
 ### 3.1 Category 1: Malformed Evidence Artifacts (Evidence Boundary)
 
 #### Control NC-01: Non-Canonical Serialization Key Order
-- **Trust Model & Verification Rule:** The evidence protocol requires all serialized evidence artifacts on disk and on the wire to be bit-exact RFC 8785 (JCS) canonical JSON bytes. The verifier enforces canonical formatting by comparing raw file/payload bytes against the expected JCS digest (`SHA256(raw_bytes) == evidence.digest`) and confirming `raw_bytes == JCS_serialize(parse_json(raw_bytes))`.
-- **Fault Injected:** Evidence bundle JSON keys are reordered (e.g. `{"b": 1, "a": 2}` instead of canonical `{"a": 2, "b": 1}`) without violating standard JSON grammar rules.
-- **Expected Outcome:** Because raw payload bytes deviate from bit-exact JCS canonical formatting, direct byte hash comparison or JCS exact-byte validation fails with error code `ERR_CANONICAL_HASH_MISMATCH`. (This is explicitly distinguished from `ERR_JSON_SYNTAX_ERROR` in NC-01B, which tests syntactically malformed JSON).
+- **Trust Model & Verification Rule:** This experiment adds a strict canonical wire/storage profile to [RFC 8785 (JCS)](https://www.rfc-editor.org/rfc/rfc8785#section-3). RFC 8785 itself permits noncanonical JSON on the wire when endpoints canonicalize before cryptographic verification. Here, for each JSON evidence bundle, decode strict UTF-8, parse JSON, reject duplicate property names and inputs outside the JCS domain, and compute `canonical_bytes = JCS_serialize(parsed_value)` as UTF-8. Require `raw_bytes == canonical_bytes`, including absence of a BOM or trailing newline. Do not normalize Unicode. JCS requires ECMAScript number serialization and recursive UTF-16 property-name sorting; Python `json.dumps(sort_keys=True)` alone is not a conforming implementation.
+- **No Self-Referential Digest:** NC-01 does not require a whole-bundle digest stored inside the bundle. Remove the former `SHA256(raw_bytes) == evidence.digest` check. A whole-file SHA256 may be recorded separately in measurement output after the bundle is finalized; this is a measurement identifier, not an authentication trust anchor. Signature coverage and trusted keys remain separate verification requirements.
+- **Fault Injected:** Start with canonical bytes `{"a":2,"b":1}` and reorder only keys to `{"b":1,"a":2}`. Both parse to the same value, and canonicalizing either produces identical bytes. Preserve all semantic fields and signatures. Include whitespace-only variants as additional NC-01 fixtures.
+- **Expected Outcome:** The explicit raw-versus-canonical byte comparison fails with `ERR_CANONICAL_HASH_MISMATCH` (retained protocol error name; it denotes noncanonical serialization, not necessarily a hash mismatch). Reordering alone does not invalidate a signature over canonical data. This failure is distinct from malformed JSON in NC-01B and semantic tampering in NC-05.
+- **Verification Order & Positive Controls:** Parse first (`ERR_JSON_SYNTAX_ERROR` for malformed JSON), then validate the JCS domain (`ERR_JCS_DOMAIN_ERROR` for duplicate names, invalid Unicode or unrepresentable numbers), then check canonical bytes, then schema, semantic digests and signatures. A canonical valid bundle passes the formatting stage. A canonically serialized quantity change also passes that stage, but fails NC-05's unchanged input digest (`ERR_INPUT_DIGEST_MISMATCH`) before signature checking. Syntax-valid JSON outside the JCS domain must not be mislabeled as a mere key-order fault. This ordering prevents a signature failure from masking the control being tested.
 
 #### Control NC-01B: Malformed JSON Syntax
 - **Fault Injected:** A trailing comma or unescaped control character is inserted into the serialized evidence file (`{"meaning": ... ,}`).
@@ -62,8 +64,8 @@ Fault injections are classified into three distinct threat categories and trust 
 - **Expected Outcome:** Verifier signature check fails with `ERR_SIGNATURE_INVALID`. Evidence bundle rejected as untrusted.
 
 #### Control NC-05: Tampered Input Payload Digest
-- **Fault Injected:** The input payload JSON parameter `quantity` is modified from $100$ to $500$ after bundle generation, while `evidence.input_digest` remains unchanged.
-- **Expected Outcome:** Verifier recomputing SHA256 of `meaning.parameters` detects mismatch with `evidence.input_digest`. Verification fails with `ERR_INPUT_DIGEST_MISMATCH`.
+- **Fault Injected:** The input payload JSON parameter `quantity` is modified from $100$ to $500$ after bundle generation, while `evidence.input_digest` remains unchanged. Re-serialize the modified bundle as JCS so canonical formatting still passes; preserve the original signature and digest fields.
+- **Expected Outcome:** Verifier recomputing `SHA256(JCS_serialize(meaning.parameters))` detects mismatch with `evidence.input_digest`. Verification fails with `ERR_INPUT_DIGEST_MISMATCH`.
 
 ### 3.2 Category 2: Malicious Guest Execution (Guest Boundary)
 

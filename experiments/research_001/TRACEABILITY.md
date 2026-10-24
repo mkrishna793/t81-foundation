@@ -19,7 +19,7 @@ This document provides a comprehensive, auditable traceability matrix mapping ev
 
 | Defect ID | Defect Summary | Affected Document(s) | Corrective Action Applied | Validation Method |
 | :--- | :--- | :--- | :--- | :--- |
-| **DEF-01** | Control NC-01 conflated JSON syntax validation with JCS key-reordering canonicalization. | `NEGATIVE_CONTROLS.md` | Explicitly defined the wire/storage trust model requiring bit-exact RFC 8785 JCS bytes. Clarified that NC-01 fails with `ERR_CANONICAL_HASH_MISMATCH` under byte-level JCS verification, distinguished from `ERR_JSON_SYNTAX_ERROR` in NC-01B. | Synthetic JSON canonicalization unit tests in `verify.py`. |
+| **DEF-01** | Control NC-01 conflated JSON syntax validation with JCS key-reordering canonicalization. | `NEGATIVE_CONTROLS.md` | Explicitly defined the wire/storage trust model requiring bit-exact RFC 8785 JCS bytes. Clarified that NC-01 fails with `ERR_CANONICAL_HASH_MISMATCH` under byte-level JCS verification, distinguished from `ERR_JSON_SYNTAX_ERROR` in NC-01B. | Audit fixtures in `audit/test_nc01_contract.py`; benchmark `verify.py` remains unimplemented. |
 | **DEF-02** | Ed25519 verification dependency was inaccurately presented as part of standard Python stdlib. | `BASELINE_SPECIFICATION.md`, `REPRODUCIBILITY.md`, `EXPERIMENT_PROTOCOL.md` | Specified that Ed25519 signature verification in Python 3.12 requires the external `cryptography` PyPI package (`pip install cryptography`), with stdlib HMAC-SHA256 as an optional fallback. | Dependency check script in `verify.py`. |
 | **DEF-03** | Outcome B performance and host complexity thresholds were contradictory across documents ($2\times$ vs $5\times$). | `HYPOTHESES.md`, `STOPPING_CRITERIA.md`, `RESEARCH_PROPOSAL.md`, `CLAIM_REGISTER.md` | Harmonized threshold across all files: Arm (iii) achieves equal or lower decision execution latency AND $\ge 5\times$ lower host runtime LOC footprint. | Cross-document automated grep and text consistency audit. |
 | **DEF-04** | Negative controls lacked a structured threat taxonomy and explicit trust boundary audit. | `NEGATIVE_CONTROLS.md` | Categorized all controls into Evidence Boundary (NC-01, NC-01B, NC-04, NC-05), Guest Boundary (NC-02, NC-03, NC-06), and Host Boundary (NC-07, NC-08). | Control matrix threat taxonomy audit. |
@@ -31,3 +31,13 @@ This document provides a comprehensive, auditable traceability matrix mapping ev
 | **DEF-10** | Unverified claims presented RFC-00D4 as an established industry standard. | All 10 protocol documents | Labeled RFC-00D4 accurately across all files as an internal experimental specification draft proposal (`spec/rfcs/RFC-00D4-accountable-decision-bundle.md`). | Repository-wide documentation search audit. |
 | **DEF-11** | Sample size $N=30$ was falsely claimed to establish zero failure probability ($p=0$). | `MEASUREMENT_PLAN.md`, `STOPPING_CRITERIA.md`, `RESEARCH_CHARTER.md`, `EXPERIMENT_PROTOCOL.md` | Added Clopper-Pearson 95% confidence bounds ($N=30 \le 9.50\%$, $N=300 \le 0.99\%$). Defined Student's t / bootstrap $CI_{95}$ and non-parametric hypothesis tests. | Statistical formula audit. |
 | **DEF-12** | Inconsistent dates, versions, cross-references, and terminology across research documents. | All 10 protocol documents | Normalized all headers to Date: April 2026, Version: v1.1.0, Location: `experiments/research_001/`, and standardized Markdown links. | Metadata normalization audit. |
+
+## Post-merge validation status
+
+The [PR #563 audit](POST_MERGE_AUDIT.md) supersedes any implication that all
+validation methods above have been executed. References to benchmark `verify.py`,
+harness checks and pipeline checks are planned validation: those implementations
+do not exist in Research Protocol 001. The audit records actual checks separately.
+NC-01 now uses explicit raw/JCS byte equality without an embedded whole-file
+digest; NC-05 and the baseline both hash JCS `meaning.parameters`. The retained
+`ERR_CANONICAL_HASH_MISMATCH` name describes the canonical-byte check.

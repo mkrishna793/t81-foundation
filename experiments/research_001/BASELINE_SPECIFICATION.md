@@ -83,7 +83,7 @@ Verification of Arm (iii) evidence bundles MUST be executed using the standalone
 - Requires Python 3.12 stdlib plus `cryptography` package (or stdlib `hmac`/`hashlib` in HMAC fallback mode).
 - Primary comparative measurements verify RFC 8785 canonical JSON bundles across all arms. Native secondary formats (e.g. raw tryte/binary streams) are recorded separately to quantify serialization overhead.
 - Step 1: Validate bundle structure against internal RFC-00D4 experimental draft JSON Schema (`spec/rfcs/RFC-00D4-accountable-decision-bundle.md`).
-- Step 2: Recompute `SHA256(RFC8785_canonical_json(meaning))` and verify agreement with `evidence.input_digest`.
+- Step 2: Recompute `SHA256(RFC8785_canonical_json(meaning.parameters))` and verify agreement with `evidence.input_digest`.
 - Step 3: Verify cryptographic signature over bundle digest.
 - Step 4: Re-evaluate policy logic locally to verify `authority.verdict == ALLOW`.
 

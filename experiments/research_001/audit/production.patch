@@ -1,0 +1,44 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c8c81214..cbaa5835 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1960,0 +1961 @@ set(T81_INSTALL_TARGETS
++  t81_math_quantization
+@@ -1965,0 +1967 @@ set(T81_INSTALL_TARGETS
++  t81_decode
+diff --git a/src/direct_api/CMakeLists.txt b/src/direct_api/CMakeLists.txt
+index 91234b47..8eb0359f 100644
+--- a/src/direct_api/CMakeLists.txt
++++ b/src/direct_api/CMakeLists.txt
+@@ -5,0 +6 @@ add_library(t81_direct_api STATIC
++    ${PROJECT_SOURCE_DIR}/vm/ai_backend/controlled_ai_backend.cpp
+@@ -11,3 +11,0 @@ target_link_libraries(t81_direct_api PUBLIC
+-    t81_ai_backend
+-    t81_weights
+-    t81_canonfs
+@@ -14,0 +13,3 @@ target_link_libraries(t81_direct_api PUBLIC
++    t81_tool_model
++    t81_tool_cli
++    t81_vm
+diff --git a/src/tools/CMakeLists.txt b/src/tools/CMakeLists.txt
+index 2de3137d..3f004052 100644
+--- a/src/tools/CMakeLists.txt
++++ b/src/tools/CMakeLists.txt
+@@ -61,0 +62 @@ target_link_libraries(t81_tool_cli PUBLIC t81_lang_frontend t81_isa t81_vm t81_t
++target_link_libraries(t81_tool_cli PRIVATE t81_math_quantization t81_decode)
+diff --git a/vm/ai_backend/controlled_ai_backend.cpp b/vm/ai_backend/controlled_ai_backend.cpp
+index 80e985ae..8ae65307 100644
+--- a/vm/ai_backend/controlled_ai_backend.cpp
++++ b/vm/ai_backend/controlled_ai_backend.cpp
+@@ -101,2 +101 @@ bool ControlledAIBackend::check_policy_consent(const std::string& operation_type
+-  ctx.operation = "ai.inference." + operation_type;
+-  ctx.user_has_explicit_consent = true;
++  ctx.syscall = "ai.inference." + operation_type;
+@@ -104,0 +104 @@ bool ControlledAIBackend::check_policy_consent(const std::string& operation_type
++  bool allowed = (verdict.kind == t81::axion::VerdictKind::Allow);
+@@ -108 +108 @@ bool ControlledAIBackend::check_policy_consent(const std::string& operation_type
+-        std::string(verdict.allowed ? "allow" : "deny") + ": " + verdict.reason);
++        std::string(allowed ? "allow" : "deny") + ": " + verdict.reason);
+@@ -111 +111 @@ bool ControlledAIBackend::check_policy_consent(const std::string& operation_type
+-  return verdict.allowed;
++  return allowed;
