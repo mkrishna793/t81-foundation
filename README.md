@@ -1,431 +1,207 @@
-# T81 Foundation — A Systems Research Project in Computational Objects
+# T81 Foundation — Systems Research in Accountable & Deterministic Computation
 
-**Deterministic execution · Content-addressed artifacts · Explicit governance · Representation-independent interfaces**
+**Deterministic execution · Content-addressed artifacts · Pre-dispatch governance · Empirical representation limits**
 
-<p align="center">
-  <img src="docs/assets/banner.png" alt="T81 Foundation" width="100%">
-</p>
+[![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
+[![ISA](https://img.shields.io/badge/ISA-v1.9.0_Frozen-blue.svg)](spec/tisc/opcode-registry.md)
+[![Status](https://img.shields.io/badge/Research-Active-green.svg)](docs/research/RESEARCH_CHARTER.md)
 
-[English](./README.md) | [简体中文](./README.zh-CN.md) | [Español](./README.es.md) | [Русский](./README.ru.md) | [Português](./README.pt-BR.md)
+T81 Foundation is an experimental scientific research project and systems engineering substrate investigating the boundaries of **deterministic execution, policy-governed computation, content-addressed artifact provenance, and alternative computational representations** (including balanced ternary, Base-81 trytes, and packed low-bit tensors).
 
-![Release](https://img.shields.io/badge/release-v1.9.1--Stable-blue)
-![ISA](https://img.shields.io/badge/ISA-v1.9.0_Frozen-blue)
-![License](https://img.shields.io/badge/license-Apache_2.0-blue)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/t81dev/t81-foundation)
+Rather than claiming a settled architecture or production operating system, T81 operates as an **empirical research program** that formulates falsifiable hypotheses, implements executable reference systems, runs comparative benchmarks, and preserves both positive and negative results.
 
-T81 Foundation is an experimental computing substrate for investigating how computational artifacts can be identified, inspected, governed, composed, and executed across different representations and execution environments.
+---
 
-The repository provides a concrete starting point: a virtual machine and instruction set, content-addressed storage, policy-enforcement mechanisms, language tooling, deterministic computation facilities, and interfaces for importing and inspecting model artifacts.
+## 1. Research Motivation & Scientific Questions
 
-These components support a broader research question:
+Contemporary computing relies almost exclusively on binary CMOS representations, IEEE 754 floating-point arithmetic, and implicit post-hoc authorization. While efficient, these foundations create challenges for cross-platform state reproduction, verifiable execution traces, and pre-side-effect policy enforcement in autonomous or probabilistic AI runtimes.
 
-> **Can different kinds of computational objects share stable system interfaces without erasing the differences between their representations, capabilities, and execution requirements?**
+T81 investigates one central scientific question:
 
-T81 does not assume that this question has a single obvious answer. The project investigates it through implementations, executable contracts, controlled experiments, benchmarks, and documented limitations.
+> **Can alternative representations, deterministic runtime execution, or explicit policy governance produce measurable or theoretically defensible advantages over standard binary pipelines?**
 
-The existing runtime is an experimental foundation—not a predetermined architecture for every future computing system.
+### Core Research Hypotheses Under Test
 
-## 1. Research direction
+- **Track R (Scientific Computing & Alternative Representations):**
+  - *H01 (Ternary Software Arithmetic):* Does Base-81 software tryte grouping reduce addition latency on binary ALUs? *(Falsified)*
+  - *H02 (SWAR Vectorization):* Do SWAR ternary SIMD operations improve compute density over binary SIMD? *(Falsified)*
+  - *H03 (Packed Ternary MatVec):* Does on-the-fly 2-bit ternary weight decoding execute faster than INT8 AVX2/NEON SIMD? *(Falsified for speed; validated for storage reduction)*
+- **Track F (Foundation Systems & Governance):**
+  - *H04 (Custom VM Necessity):* Is a bespoke virtual machine required for pre-side-effect policy enforcement and accountable evidence? *(Revised; protocol evidence is runtime-agnostic)*
+  - *H05 (Inner-Dispatch Governance):* Does pre-dispatch policy evaluation (`eval_axion_call`) reliably prevent unauthorized side effects? *(Established)*
+  - *H06 (Detached Evidence Protocol):* Can cryptographic evidence bundles (RFC-00D4) be verified offline without the producer VM? *(Established)*
+  - *H07 (Cross-Platform Determinism):* Do soft-float transcendentals (RFC-0030) guarantee bit-exact parity across x86_64, ARM64, and WebAssembly? *(Established)*
+  - *H08 (Artifact Identity & Provenance):* Does content-addressed storage (CanonFS / RFC-00D1) deliver immutable byte identity across systems? *(Established)*
 
-Most computing systems distinguish between data, programs, models, execution engines, and operating-system services. Those distinctions are useful, but they also create boundaries where identity, capabilities, execution requirements, permissions, and provenance must be translated or reconstructed.
+---
 
-T81 explores whether a more explicit computational-object model can make these relationships easier to inspect and manage.
+## 2. Demonstrated System Capabilities
 
-A computational object might be a model, tensor, program, policy, decision, evidence record, or another artifact with a defined representation and contract. Objects need not share a file format, internal structure, or execution mechanism to participate in a common system.
+The repository contains concrete, functional C++23 software components validated through CTest targets and regression harnesses:
 
-The central hypothesis is that **stable object identity and explicit capabilities can provide a useful interface across changing representations and execution implementations**.
+| Component | Implemented Role | Key Source Paths | Evidence & Status |
+| :--- | :--- | :--- | :--- |
+| **TISC ISA (v1.9.0)** | 81-opcode instruction set for deterministic state machine execution | `include/t81/isa/opcodes.hpp` | **v1.9.0 Frozen** (CTest #391–396) |
+| **T81VM Interpreter** | Bit-exact virtual machine executing TISC bytecode | `src/vm/vm.cpp` | **DCP Compliant** (`vm_determinism_property_test`) |
+| **Axion Policy OS** | Fail-closed pre-dispatch policy evaluation engine | `src/axion/` | **Alpha Governance** (CTest #154) |
+| **CanonFS Storage** | Content-addressed storage and foreign filesystem interchange (RFC-00D1) | `src/core/fs/` | **Beta Identity FS** (CTest #84–85) |
+| **T81Lang Tooling** | Lexer, parser, AST, IR generator, and TISC compiler | `src/lang/` | **Beta Language** (`t81 code build`) |
+| **Model Intake Bridge** | GGUF/Safetensors tensor inventory & header inspection | `src/tools/model/` | **Metadata Bridge** (CTest #166) |
+| **Accountable Evidence** | Detached evidence bundle generator & verifier (RFC-00D4) | `examples/governance/` | **Research Reference** (CTest #4) |
 
-This is a research hypothesis, not an established result.
+---
 
-### Questions under investigation
+## 3. Verified Experimental Results & Hypothesis Ledger
 
-- **Identity:** What should identify an object when its representation changes but its logical role remains the same?
-- **Inspection:** What can a system determine about an object before loading or executing it?
-- **Capabilities:** How should an object declare what operations it supports and what resources those operations require?
-- **Execution:** Can one object interface accommodate different virtual machines, inference engines, CPU implementations, and accelerators?
-- **Representation:** When are binary, balanced-ternary, symbolic, or learned representations meaningfully interchangeable?
-- **Governance:** Where should authorization and policy checks occur, and what evidence establishes that they cannot be bypassed within a defined execution path?
-- **Reproducibility:** Which properties can be reproduced exactly, under what environmental constraints, and which cannot?
-- **Composition:** Can objects be connected into larger computations while preserving identity, constraints, and evidence about the resulting execution?
+All experimental conclusions in T81 are grounded in reproducible benchmarks and documented research closure reports:
 
-These questions should shape the architecture through evidence rather than dictate its answers in advance.
+### 1. Ternary CPU Arithmetic & Radix Comparison (H01)
+- **Finding:** Grouping 4 balanced trits into Base-81 trytes (`std::array` stack allocation) reduced software tryte addition latency from $105.3\text{ ns}$ down to $11.7\text{ ns}$.
+- **Baseline Comparison:** Native 64-bit binary ALU integer addition executes in $1.1\text{ ns}$ ($10.6\times$ faster).
+- **Status:** **FALSIFIED / FROZEN** (`docs/research/TERNARY_ARITHMETIC_AND_RADIX_COMPARISON.md`).
 
-## 2. What exists today
+### 2. Packed 2-Bit Ternary MatVec Inference (H03)
+- **Finding:** VPSHUFB nibble-parallel lookup table decoding (`matvec_ternary_2bit_avx2`) achieves $12.91\text{ GFLOP/s}$ on $4096^2$ matrices, saving $75\%$ memory footprint versus FP32.
+- **Baseline Comparison:** INT8 AVX2 SIMD dot products achieve $17.15\text{ GFLOP/s}$ ($1.33\times$ faster). The SIMD bit-shuffle decode instruction tax offsets memory bandwidth savings in cache.
+- **Status:** **FALSIFIED for execution speed; REVISED for storage efficiency** (`docs/research/PACKED_TERNARY_MATVEC_PERFORMANCE_REPORT.md`).
 
-T81 already contains several concrete systems components. Their presence does not establish every system-wide property attributed to them; the implementation, contracts, tests, and documented limitations determine what can reasonably be claimed.
+### 3. Accountable Computation Baseline Experiment (H04 / H05 / H06)
+- **Finding:** Pre-dispatch policy evaluation in T81VM (`eval_axion_call`) achieves $0.0\%$ unauthorized side-effect breach rates under mid-flight policy revocation.
+- **Baseline Comparison:** A conventional Wasmtime + Open Policy Agent (OPA) host FFI capability baseline (Project Baseline-X) achieved identical $0.0\%$ breach rates and $100\%$ detached evidence auditability with $10\times$ lower host C++ code complexity.
+- **Status:** **REVISED** — Accountable computation is a protocol, not a custom VM (`docs/research/consolidation/README.md`).
 
-| Component | Intended role | Evidence and scope |
-|---|---|---|
-| **TISC ISA** | Instruction set for T81 execution | ISA v1.9.0 is designated frozen by the project. See the canonical specifications. |
-| **T81VM** | Executes supported TISC programs | Inspect the implementation, execution contracts, and tests to establish supported behavior. |
-| **Axion** | Applies policy and governance rules at defined execution boundaries | Evaluate enforcement through implementation paths, denial tests, and explicit side-effect boundaries. |
-| **CanonFS** | Content-addressed storage and artifact retrieval | Test import, identity, export, integrity checks, and policy-controlled operations. |
-| **T81Lang** | Language tooling for T81 programs and ternary-oriented computation | Evaluate supported syntax, compilation, execution, and conformance against the current implementation. |
-| **Model artifact intake** | Recognizes and inspects supported model formats and tensor inventories | Distinguish format recognition and metadata extraction from model loading, inference, or semantic equivalence. |
-| **Determinism facilities** | Provide controlled execution and reproducibility mechanisms | Establish the applicable input, environment, numeric, platform, and output constraints from the relevant contracts and tests. |
+---
 
-The repository also contains experimental research outside the deterministic core. Such work should not automatically inherit the maturity, security properties, or reproducibility claims of the core components.
+## 4. System Architecture
 
-For current status and authoritative definitions, consult the [system status](docs/status/SYSTEM_STATUS.md), [project boundaries](docs/PROJECT_BOUNDARIES.md), and [determinism surface registry](docs/governance/DETERMINISM_SURFACE_REGISTRY.md).
-
-## 3. Architectural principles
-
-The project follows five working principles.
-
-### 3.1 Evidence before architecture
-
-An appealing abstraction is not evidence that the abstraction is useful. Architectural proposals should be evaluated against working alternatives, representative workloads, explicit requirements, and reproducible results.
-
-### 3.2 Representations remain plural
-
-Balanced ternary is one research direction, not a requirement that every object or computation use ternary encoding.
-
-Binary formats, conventional numeric types, symbolic representations, learned representations, and ternary encodings should be compared where the comparison is meaningful. A representation earns its place through demonstrated benefits for a defined workload.
-
-### 3.3 Interfaces should outlive implementations
-
-A useful object contract should not unnecessarily depend on a particular file format, inference engine, VM, or device.
-
-However, abstraction must not conceal important differences. Precision, quantization, supported operations, resource requirements, execution semantics, and security boundaries must remain visible wherever they affect correctness.
-
-### 3.4 Governance is distinct from correctness
-
-A computation can be authorized but incorrect. An artifact can have a valid cryptographic identity but contain false information. A deterministic decision can be consistently reproduced and still be unjustified.
-
-T81 therefore treats artifact integrity, execution authorization, reproducibility, and the validity of a result as distinct properties requiring different evidence.
-
-### 3.5 Failure is a research result
-
-Failed experiments, unsupported formats, performance regressions, abstraction leaks, portability failures, and unsuccessful hardware integrations are valuable findings.
-
-They should be recorded rather than hidden behind maturity labels or replaced with unsupported claims of generality.
-
-## 4. System architecture
-
-The existing implementation provides several mechanisms that can support experiments in computational objects. The following is a way to understand their roles, not a claim that a complete, universal object architecture has already been implemented.
-
-### Artifact identity and storage
-
-CanonFS provides content-addressed artifact storage. Cryptographic identity can help detect changes to stored content and establish references between artifacts.
-
-Content addressing alone does not establish the origin, truth, safety, or authorization of an artifact. Those properties require additional evidence and policies.
-
-### Execution
-
-T81VM and the TISC instruction set define one execution environment. The relevant contracts establish what instructions, types, and execution behaviors are supported.
-
-A future object abstraction may need to accommodate execution providers beyond T81VM. Whether this can be accomplished without sacrificing useful guarantees is an open question.
-
-### Policy enforcement
-
-Axion provides policy-enforcement mechanisms for defined operations and execution paths.
-
-The important research boundary is not simply whether a policy engine returns an allow or deny verdict. It is whether the protected operation is actually prevented before the relevant side effect when authorization fails. That claim must be established for each covered path.
-
-### Model artifacts
-
-Model formats such as GGUF and Safetensors describe artifacts with different conventions and metadata. Importing a model artifact is not equivalent to executing it.
-
-A useful object interface should expose what is known about an imported artifact, what remains unknown, and which operations are supported by available execution providers.
-
-### Provenance and evidence
-
-Execution inputs, transformations, policy decisions, outputs, and verification results can be represented as linked artifacts where supported.
-
-The objective is to make the basis of a result inspectable without confusing recorded provenance with proof that the result is factually or normatively correct.
-
-## 5. Current execution workflow
-
-The following sequence illustrates the intended relationship between artifact storage, policy enforcement, and VM execution. Actual enforcement guarantees depend on the implemented path and its contracts.
-
-```mermaid
-sequenceDiagram
-    participant Host
-    participant CFS as CanonFS
-    participant VM as T81VM
-    participant AX as Axion
-
-    Host->>CFS: Import artifact
-    CFS-->>Host: Artifact reference / hash
-    Host->>VM: Request execution with declared inputs and policy
-    loop Supported instruction cycle
-        VM->>AX: Evaluate governed operation
-        AX-->>VM: Allow or deny
-        alt Allowed
-            VM->>VM: Execute permitted operation
-        else Denied
-            VM->>VM: Trap or reject operation
-        end
-    end
-    VM-->>Host: Result and available execution evidence
+```
++-----------------------------------------------------------------------------------+
+|                            APPLICATION / AI ARTIFACT                              |
+|                   (TISC Bytecode, Model Weights, Policy AST)                      |
++-----------------------------------------------------------------------------------+
+                                       |
+                                       v
++-----------------------------------------------------------------------------------+
+|                             AXION POLICY KERNEL                                   |
+|             Pre-Dispatch Authorization (`eval_axion_call`) -> Allow / Deny          |
++-----------------------------------------------------------------------------------+
+                                       |
+                                       v
++-----------------------------------------------------------------------------------+
+|                              T81VM DETERMINISTIC CORE                             |
+|          Bit-Exact Interpreter (DCP) + Soft-Float Transcendentals (RFC-0030)      |
++-----------------------------------------------------------------------------------+
+                                       |
+                                       v
++-----------------------------------------------------------------------------------+
+|                              CANONFS IDENTITY FS                                  |
+|          Content-Addressed Storage (CanonHash-81) + RFC-00D1 Foreign Interchange    |
++-----------------------------------------------------------------------------------+
 ```
 
-This diagram is conceptual. It does not establish that every instruction, host operation, storage operation, or external side effect passes through an identical enforcement path.
+---
 
-## 6. Try T81
+## 5. Research Lineage
 
-The following instructions reflect the repository paths and commands documented for the current project. Run them from a clean checkout and consult the relevant documentation if a command, artifact, or dependency has changed.
+The concepts investigated in T81 originate from a historical sequence of discrete mathematics and experimental systems research:
 
-### 6.1 Build and run tests
+1. **Knuth Seminumerical Algorithms:** Foundational theory of balanced ternary representations, positional number systems, and 3-valued logic.
+2. **Hanoi CWEB Exploration:** Experimental CWEB implementation of ternary state machines (`experimental/hanoi/`), analyzing 41 historical shared source blobs and arithmetic carry defects.
+3. **TISC ISA & T81VM Engine:** Formalization of the frozen v1.9.0 81-opcode ISA, C++ deterministic interpreter, and Base-81 codecs.
+4. **Axion & CanonFS Framework:** Integration of pre-side-effect policy governance, content-addressed storage, and detached accountable evidence bundles (RFC-00D4).
 
-Requirements include Git, CMake, a compatible C++ toolchain, and Ninja if using the generator shown below.
+---
+
+## 6. Reproducibility & Verification Guide
+
+Follow these step-by-step instructions to build, test, and verify the repository.
+
+### Requirements
+- C++23 compliant compiler (GCC 13+, Apple Clang 16+, MSVC 2022+)
+- CMake 3.25+ and Ninja
+- Python 3.10+
+- Git
+
+### 6.1 Build and Run Core Tests
 
 ```bash
+# Clone the repository
 git clone https://github.com/t81dev/t81-foundation.git
 cd t81-foundation
 
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build
+# Configure and build
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DT81_BUILD_TESTS=ON
+cmake --build build --parallel 4
+
+# Run CTest suite
 ctest --test-dir build --output-on-failure
 ```
 
-Relevant CMake options documented by the project include:
+### 6.2 Run Research Regression Suite
 
-- `T81_STRICT_DETERMINISTIC_FLOAT=ON` — enables the configured strict deterministic floating-point paths.
-- `T81_BUILD_EXAMPLES=ON` — builds the checked-in C++ examples.
-
-Check the current CMake configuration and determinism documentation for supported options and their exact scope.
-
-### 6.2 Try the Docker demonstration
+To execute all eight consolidated research regression tests:
 
 ```bash
-docker run --rm -it ghcr.io/t81dev/t81-foundation demo
+python3 scripts/ci/run_research_regressions.py --build-dir build
 ```
 
-The documented demonstration covers a hello-world example, a ternary demo, determinism verification, and an interactive REPL.
-
-This requires access to the published image and assumes the image's `demo` command remains available.
-
-### 6.3 Demonstrate CanonFS import, export, and policy denial
-
-The following example uses the repository's documented sample artifact and denial policy.
+### 6.3 Try CanonFS Import / Export & Policy Denial
 
 ```bash
-tmp_root="$(mktemp -d)"
-canon_root="$tmp_root/.t81_canonfs"
+tmp_dir="$(mktemp -d)"
+canon_root="$tmp_dir/.t81_canonfs"
 artifact="examples/storage-and-canonfs/canonfs-interchange/v1/model.t81w"
 deny_policy="examples/storage-and-canonfs/canonfs-interchange/v1/policy-deny-all.apl"
 
-# Import the artifact.
-./build/t81 canonfs import \
-  "$artifact" \
-  --canonfs-root "$canon_root" \
-  --json
+# Import artifact into CanonFS
+./build/t81 canonfs import "$artifact" --canonfs-root "$canon_root" --json
 
-# Capture the artifact's content-addressed reference.
-canon_hash="$(
-  ./build/t81 canonfs import \
-    "$artifact" \
-    --canonfs-root "$canon_root" \
-    --json |
-  grep -o '"hash": "[^"]*"' |
-  head -n 1 |
-  cut -d'"' -f4
-)"
+# Extract content-addressed hash
+canon_hash="$(./build/t81 canonfs import "$artifact" --canonfs-root "$canon_root" --json | grep -o '"hash": "[^"]*"' | head -n 1 | cut -d'"' -f4)"
 
-# Export the artifact by reference.
-./build/t81 canonfs export \
-  "$canon_hash" \
-  --canonfs-root "$canon_root" \
-  --out "$tmp_root/restored.t81w" \
-  --json
+# Export artifact by hash
+./build/t81 canonfs export "$canon_hash" --canonfs-root "$canon_root" --out "$tmp_dir/restored.t81w" --json
 
-# Attempt an import under a denying policy.
-./build/t81 canonfs import \
-  "$artifact" \
-  --canonfs-root "$canon_root" \
-  --policy "$deny_policy" \
-  --json
+# Attempt import under denying policy (verifies policy enforcement)
+./build/t81 canonfs import "$artifact" --canonfs-root "$canon_root" --policy "$deny_policy" --json
 ```
 
-The documented expected behavior is successful import and export, followed by a policy-denial result for the final operation.
+---
 
-To validate the demonstration, check the returned status and error fields, compare the original and exported artifact bytes, and examine the storage state before and after the denied operation. A denial response alone does not prove that no side effect occurred.
+## 7. What T81 Is Not (Limitations)
 
-This demonstration requires a successfully built `build/t81` executable and the sample files shown above.
+- **Not a Commercial Operating System:** T81 is a systems research substrate, not a desktop or server OS replacement.
+- **Not Physical Hardware:** T81 runs via software emulation on binary x86_64 and ARM64 CPUs; no physical ternary silicon is claimed or required.
+- **Not a Proof of Ternary Speed Superiority:** Software ternary CPU arithmetic is proven slower than native binary ALUs on modern processors.
+- **Not an Un-gated LLM Runtime:** Model header inspection (GGUF/Safetensors) does not imply general-purpose, un-governed AI inference.
 
-### 6.4 Try the bounded AI decision-chain examples
+---
 
-The repository documents three bounded task compositions:
+## 8. Research Roadmap & Next Experiment
 
-```bash
-# Host-action assessment
-bash examples/ai-and-inference/model-load-canonfs/run_assess_fixed_host_action.sh
+The immediate research focus is defined by **Candidate 3 (Deterministic AI Execution Parity)**:
 
-# Path selection
-bash examples/ai-and-inference/model-load-canonfs/run_route_fixed_path_selection.sh
+- **Scientific Objective:** Validate whether soft-float transcendentals (RFC-0030) and CanonHash-81 trace caching achieve $100\%$ bit-identical trace parity across x86_64, ARM64, and WebAssembly targets with $<5\%$ execution time tax vs native `libm`.
+- **Target Surface:** `tests/determinism/` and `vm/determinism/`.
+- **Reassessment Report:** See [`docs/research/T81_FULL_REASSESSMENT_2026-10-25.md`](docs/research/T81_FULL_REASSESSMENT_2026-10-25.md) for full experimental details.
 
-# Rule selection
-bash examples/ai-and-inference/model-load-canonfs/run_classify_fixed_rule_selection.sh
-```
+---
 
-These examples correspond to the bounded task families `assess-fixed`, `route-fixed`, and `classify-fixed`.
+## 9. Primary Evidence & Documentation References
 
-The documented output is a content-addressed decision bundle containing task results, execution provenance, a typed downstream record, and a canonical bundle header.
+- [Full Research Reassessment Report (October 2026)](docs/research/T81_FULL_REASSESSMENT_2026-10-25.md)
+- [T81 Research Charter](docs/research/RESEARCH_CHARTER.md)
+- [Ternary Research Closure & Next Hypothesis Decision](docs/research/TERNARY_RESEARCH_CLOSURE_AND_NEXT_HYPOTHESIS.md)
+- [TISC v1.9.0 Opcode Registry Specification](spec/tisc/opcode-registry.md)
+- [CanonFS Foreign Filesystem Interchange (RFC-00D1)](spec/rfcs/RFC-00D1-canonfs-foreign-filesystem-interchange.md)
+- [Accountable Decision Bundle Specification (RFC-00D4)](spec/rfcs/RFC-00D4-accountable-decision-bundle.md)
+- [Research Consolidation Evidence Ledger](docs/research/consolidation/README.md)
 
-To inspect a generated bundle:
+---
 
-```bash
-bash examples/ai-and-inference/model-load-canonfs/summarize_ai_bundle.sh \
-  <bundle_ref> \
-  <canonfs_root>
-```
+## 10. Contributing
 
-These examples should be understood within their implemented task and input boundaries. They do not by themselves establish general-purpose LLM execution, unrestricted autonomous reasoning, or the correctness of arbitrary decisions.
-
-## 7. Research program
-
-The following experiments are intended to test whether the proposed computational-object abstraction provides practical value. They are research directions, not claims that the complete functionality already exists.
-
-### Experiment A — Stable identity across representations
-
-**Question:** Can an artifact retain a meaningful identity and lineage when its representation changes?
-
-Test content identity, logical identity, and transformation identity separately. A converted or quantized model may be related to its source without being byte-identical or semantically equivalent.
-
-**Evidence to collect:** hashes, format metadata, transformation records, verification results, and explicit rules for when identities are equal or merely related.
-
-### Experiment B — Model inspection before execution
-
-**Question:** Can a system describe a model's structure and requirements before selecting an inference engine?
-
-Start with supported conventional formats and record the metadata that can actually be extracted. Keep format recognition, tensor inventory, architecture identification, and execution capability as separate findings.
-
-**Evidence to collect:** format coverage, parsing failures, tensor metadata, unsupported structures, resource estimates where justified, and differences between declared and observed capabilities.
-
-### Experiment C — Replaceable execution providers
-
-**Question:** Can the same object-facing contract accommodate materially different execution implementations?
-
-Use an existing inference engine as a baseline before building a new one. Compare observable behavior, precision, resource use, supported operations, and output differences across providers.
-
-**Evidence to collect:** a shared conformance suite, backend-specific requirements, compatibility failures, performance measurements, and a record of any abstraction leaks.
-
-### Experiment D — Alternative numerical representations
-
-**Question:** When does balanced ternary or another alternative representation offer a measurable advantage?
-
-Choose a specific workload and a fair baseline. Include conversion overhead, memory consumption, precision, throughput, and end-to-end latency. A smaller encoded representation is not necessarily a faster or more efficient computation.
-
-**Evidence to collect:** reproducible benchmarks, correctness checks, hardware and software configuration, and negative results.
-
-### Experiment E — Governed composition
-
-**Question:** Can objects be composed into a larger computation while preserving the distinction between inputs, transformations, policies, results, and evidence?
-
-Begin with a small, bounded pipeline. Test invalid inputs, unauthorized operations, altered artifacts, missing evidence, and failure recovery.
-
-**Evidence to collect:** executable policy tests, state comparisons, trace completeness, reproducibility results, and documented limits of the protected boundary.
-
-### Experiment F — Determinism boundaries
-
-**Question:** Which parts of a computation can be reproduced exactly across supported environments?
-
-Specify the inputs, seeds, runtime versions, numeric behavior, execution profile, and platform assumptions. Distinguish exact byte equality from equivalent task outcomes or statistically similar model outputs.
-
-**Evidence to collect:** a declared platform matrix, repeated executions, cross-platform comparisons, failure cases, and explicit exclusions.
-
-### How to evaluate an experiment
-
-Each experiment should record:
-
-1. The hypothesis and a result that would falsify it.
-2. The baseline and competing implementation.
-3. The exact inputs, versions, configuration, and environment.
-4. The test procedure and raw results.
-5. Known limitations and unresolved questions.
-6. The decision: continue, revise, narrow, or abandon the approach.
-
-An experiment should be allowed to change the architecture. Otherwise, it is an implementation exercise rather than a meaningful test of the underlying idea.
-
-## 8. Evidence, status, and guarantees
-
-T81 uses deterministic execution, artifact identity, and policy enforcement as important design goals. The strength of any particular claim depends on the relevant implementation and evidence.
-
-| Property | What must be established |
-|---|---|
-| Artifact integrity | The hash algorithm, canonicalization rules, covered bytes, and verification behavior. |
-| Immutability | Which operations are prevented from changing stored content, including relevant filesystem and administrative boundaries. |
-| Policy enforcement | Which operations are protected, where checks occur, and whether denial prevents the specified side effect. |
-| Deterministic execution | The declared execution profile, input assumptions, numeric rules, environment constraints, and observable outputs. |
-| Cross-platform reproducibility | The specific platforms and configurations tested, along with the exact equality criterion. |
-| Provenance | Which events and transformations are recorded, how records are linked, and what evidence can be independently verified. |
-| Portability | Which consumers can validate or use an artifact without the original runtime, and which dependencies remain necessary. |
-| Decision validity | The separate evidence needed to establish that a result is correct, justified, or appropriate for its intended use. |
-
-Passing tests demonstrate behavior under tested conditions. They do not establish universal correctness or eliminate untested attack paths.
-
-For authoritative project status, consult:
-
-- [System status](docs/status/SYSTEM_STATUS.md)
-- [Determinism surface registry](docs/governance/DETERMINISM_SURFACE_REGISTRY.md)
-- [Project boundaries](docs/PROJECT_BOUNDARIES.md)
-- [Model import contract](docs/contracts/MODEL_IMPORT_V1_CONTRACT.md)
-- [Deterministic Core Profile and related status documentation](docs/status/)
-
-Test counts and release labels are snapshots. Verify the current checkout and CI results before relying on them.
-
-## 9. What T81 is not
-
-T81's scope is deliberately bounded.
-
-- **Not a general-purpose operating system.** The project explores system-level abstractions but is not a replacement for a desktop or server operating system.
-- **Not a universal execution engine.** T81VM executes the programs and instructions supported by its implementation; it is not a host for arbitrary binaries.
-- **Not a general-purpose LLM runtime by default.** Recognizing or inspecting a model artifact does not imply that the model can be loaded or executed.
-- **Not dependent on physical ternary hardware.** Ternary-oriented computation can be investigated on conventional binary hardware, but that does not establish a performance advantage.
-- **Not proof that ternary is superior.** Alternative representations must demonstrate value against fair baselines.
-- **Not proof that a decision is true or justified.** Integrity, provenance, authorization, determinism, and decision validity are different properties.
-- **Not a claim of universal security.** Security properties apply only to defined mechanisms, interfaces, and threat models supported by evidence.
-- **Not a settled architecture.** The long-term relationship between object interfaces, execution providers, governance, and operating-system services remains open to experimentation.
-
-## 10. Repository entry points
-
-Start with the documentation closest to the question being investigated.
-
-### Operating and using T81
-
-- [T81 Operator Guide](docs/explanation/T81_OPERATOR_GUIDE.md) — practical guidance for the documented runtime surfaces.
-- [CanonFS Interchange Contract — RFC-00D1](spec/rfcs/RFC-00D1-canonfs-foreign-filesystem-interchange.md) — artifact interchange specification.
-- [Bounded AI OS-Object Family Status](docs/status/BOUNDED_AI_OS_OBJECT_FAMILY_STATUS.md) — status of the admitted bounded decision-chain family.
-- [Bundle Consumption Contract](docs/reference/AI_OS_OBJECT_BUNDLE_CONSUMPTION_CONTRACT.md) — contract for consumers of decision bundles.
-- [Model Import Contract](docs/contracts/MODEL_IMPORT_V1_CONTRACT.md) — model-import result contract.
-
-### Understanding boundaries and evidence
-
-- [Project Boundaries](docs/PROJECT_BOUNDARIES.md) — intended separation between project components.
-- [System Status](docs/status/SYSTEM_STATUS.md) — current documented status of the deterministic core.
-- [Determinism Surface Registry](docs/governance/DETERMINISM_SURFACE_REGISTRY.md) — declared determinism boundaries.
-- [Model Artifact Strategy](docs/explanation/MODEL_ARTIFACT_STRATEGY.md) — the narrower artifact-intake direction and its rationale.
-- [RFC-00D2: DAIOS Target Architecture and Sequencing](spec/rfcs/RFC-00D2-daios-target-architecture-and-sequencing.md) — the project's documented target architecture and sequencing proposal.
-
-Target architecture documents describe proposals and direction. They should not be read as proof that every proposed subsystem is implemented.
-
-## 11. Project direction
-
-T81's next stage should be driven by small experiments that test the boundaries between artifact identity, representation, execution, and governance.
-
-The immediate priority is not to rewrite every subsystem around a new abstraction. It is to determine whether a small, useful computational-object contract can survive real differences in model formats, numerical representations, execution providers, and system constraints.
-
-A promising contract should make common operations easier without concealing meaningful differences. An unsuccessful contract should be narrowed or discarded.
-
-The longer-term direction may include a computing environment in which programs, models, policies, decisions, and evidence are managed as identifiable computational objects. Whether that requires a new runtime, a layer over existing engines, extensions to operating-system services, or a combination of approaches remains an open research question.
-
-**The objective is not to prove the architecture right. It is to discover which parts of the architecture deserve to exist.**
-
-## 12. Contributing
-
-Contributions should favor reproducible experiments, precise contracts, narrow implementation changes, and clear evidence.
-
-When proposing a new capability:
-
-- State the problem and the alternative approaches considered.
-- Identify the contract being added or changed.
-- Include tests that exercise both expected behavior and relevant failure cases.
-- Record performance measurements with sufficient configuration detail to reproduce them.
-- Distinguish implemented behavior from future intent.
-- Update the canonical documentation when behavior or project status changes.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) for contribution guidelines and development practices.
+We welcome contributions that bring empirical rigor, reproducible experiments, or precise specification improvements. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) before submitting pull requests.
 
 ## License
 
