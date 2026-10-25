@@ -1345,6 +1345,20 @@ target_link_libraries(axion_policy_segment_event_test PRIVATE t81_isa t81_vm)
   endif()
 
   enable_testing()
+
+  # Controlled backend host authorization; checks remain active in Release tests.
+  add_executable(controlled_ai_authorization_test tests/cpp/controlled_ai_authorization_test.cpp)
+  target_link_libraries(controlled_ai_authorization_test PRIVATE t81_direct_api)
+  add_test(NAME controlled_ai_authorization_test COMMAND controlled_ai_authorization_test)
+  add_executable(direct_api_authorization_test tests/cpp/direct_api_authorization_test.cpp)
+  target_link_libraries(direct_api_authorization_test PRIVATE t81_direct_api)
+  add_test(NAME direct_api_authorization_test COMMAND direct_api_authorization_test)
+  find_package(Python3 COMPONENTS Interpreter REQUIRED)
+  add_test(NAME controlled_ai_evidence_json_test
+    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_controlled_ai_evidence_json.py
+      $<TARGET_FILE:controlled_ai_authorization_test>)
+  set_tests_properties(controlled_ai_authorization_test direct_api_authorization_test
+    controlled_ai_evidence_json_test PROPERTIES TIMEOUT 30)
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/experiments/radix_comparison/CMakeLists.txt")
     add_subdirectory(experiments/radix_comparison)
   endif()

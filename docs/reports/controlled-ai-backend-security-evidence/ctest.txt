@@ -1,0 +1,121 @@
+UpdateCTestConfiguration  from :/private/tmp/t81-controlled-ai-build/DartConfiguration.tcl
+Test project /private/tmp/t81-controlled-ai-build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 21
+    Start  21: axion_ai_hooks_test
+
+21: Test command: /private/tmp/t81-controlled-ai-build/axion_ai_hooks_test
+21: Working Directory: /private/tmp/t81-controlled-ai-build
+21: Test timeout computed to be: 30
+21: === Axion AI hooks tests (RFC-0032 Phase 3) ===
+21:
+21: [C03-01/03] load_model_via_tloadhash — non-whitelisted hash → deny
+21:   PASS  [C03-01] ok=false for non-whitelisted hash
+21:   PASS  [C03-03] trace_event non-empty on deny
+21:   PASS  [C03-03] trace_event contains 'model_load failure'
+21:   PASS  [C03-03] trace_event contains the presented hash
+21:
+21: [C03-02/04] load_model_via_tloadhash — whitelisted hash → allow
+21:   PASS  [C03-02] ok=true for whitelisted hash
+21:   PASS  [C03-04] trace_event contains 'model_load success'
+21:   PASS  [C03-04] trace_event contains the allowed hash
+21:
+21: [C04-01/02] AIHookEngine trace entries for model load
+21:   PASS  [C04-01] trace contains 'model_load failure' entry
+21:   PASS  [C04-02] trace contains 'model_load success' entry
+21:
+21: [C04-03/04/05] ATTN guard: tier check + trace emission
+21:   PASS  [C04-04] ATTN denied when tier < 2
+21:   PASS  [C04-03] trace contains 'attn_guard shape=' entry
+21:   PASS  [C04-08] trace contains 'ai_exec_gate ... policy=deny' on ATTN deny
+21:   PASS  [C04-05] ATTN allowed when tier >= 2
+21:   PASS  [C04-07] trace contains 'ai_exec_gate ... policy=allow' for ATTN tier>=2
+21:
+21: [C04-06/07] QMATMUL guard trace emission
+21:   PASS  [C04-06] QMATMUL allowed by policy with no restrictions
+21:   PASS  [C04-06] trace contains 'qmatmul_guard policy=allow'
+21:   PASS  [C04-07] trace contains 'ai_exec_gate ... policy=allow' for QMATMUL
+21:
+21: 17 passed, 0 failed
+1/7 Test  #21: axion_ai_hooks_test .....................   Passed    0.01 sec
+test 27
+    Start  27: controlled_ai_authorization_test
+
+27: Test command: /private/tmp/t81-controlled-ai-build/controlled_ai_authorization_test
+27: Working Directory: /private/tmp/t81-controlled-ai-build
+27: Test timeout computed to be: 30
+27: PASS: 30 non-Allow + 12 missing-engine/policy dispatch combinations
+27: PASS: final evidence and authorization exceptions
+27: PASS: consent blocks; explicit policy-only Allow dispatches
+27: PASS: per-operation evidence and request identity
+2/7 Test  #27: controlled_ai_authorization_test ........   Passed    0.01 sec
+test 28
+    Start  28: direct_api_authorization_test
+
+28: Test command: /private/tmp/t81-controlled-ai-build/direct_api_authorization_test
+28: Working Directory: /private/tmp/t81-controlled-ai-build
+28: Test timeout computed to be: 30
+28: ❌ Failed to load model: cannot open
+28: Failed to load model:
+28: ✅ Model loaded and cached: /var/folders/m9/2qsp_jmj3hl5lmh13__wt1h00000gn/T/t81-direct-api-security-881566485393958/model.t81w
+28: Failed to load policy:
+28: ✅ Policy loaded and cached: /var/folders/m9/2qsp_jmj3hl5lmh13__wt1h00000gn/T/t81-direct-api-security-881566485393958/deny.apl
+28: ✅ Direct API initialized in 71 µs
+28: ✅ Policy loaded and cached: /var/folders/m9/2qsp_jmj3hl5lmh13__wt1h00000gn/T/t81-direct-api-security-881566485393958/allow.apl
+28: ✅ Direct API initialized in 81 µs
+28: ✅ Direct API initialized in 3 µs
+28: 📊 Batch: 2 inputs in 13 µs
+28: 📈 Average: 6 µs per input
+28: Failed to load policy: /var/folders/m9/2qsp_jmj3hl5lmh13__wt1h00000gn/T/t81-direct-api-security-881566485393958/missing.apl
+28: ✅ Direct API initialized in 3 µs
+28: ❌ Failed to load model: cannot open /var/folders/m9/2qsp_jmj3hl5lmh13__wt1h00000gn/T/t81-direct-api-security-881566485393958/missing.t81w
+28: Failed to load model: /var/folders/m9/2qsp_jmj3hl5lmh13__wt1h00000gn/T/t81-direct-api-security-881566485393958/missing.t81w
+28: PASS: Direct API final authorization, consent, cached reinit, batch and invalidation
+3/7 Test  #28: direct_api_authorization_test ...........   Passed    0.30 sec
+test 29
+    Start  29: controlled_ai_evidence_json_test
+
+29: Test command: /opt/homebrew/Frameworks/Python.framework/Versions/3.14/bin/python3.14 "/private/tmp/t81-controlled-ai-security/tests/python/test_controlled_ai_evidence_json.py" "/private/tmp/t81-controlled-ai-build/controlled_ai_authorization_test"
+29: Working Directory: /private/tmp/t81-controlled-ai-build
+29: Test timeout computed to be: 30
+29: PASS: exact verdict/context/reason round trip through JSON
+4/7 Test  #29: controlled_ai_evidence_json_test ........   Passed    0.07 sec
+test 80
+    Start  80: canonfs_policy_boundary_test
+
+80: Test command: /private/tmp/t81-controlled-ai-build/canonfs_policy_boundary_test
+80: Working Directory: /private/tmp/t81-controlled-ai-build
+80: Test timeout computed to be: 30
+5/7 Test  #80: canonfs_policy_boundary_test ............   Passed    0.02 sec
+test 151
+    Start 151: t81_vm_ai_predispatch_deny_audit_test
+
+151: Test command: /private/tmp/t81-controlled-ai-build/t81_vm_ai_predispatch_deny_audit_test
+151: Working Directory: /private/tmp/t81-controlled-ai-build
+151: Test timeout computed to be: 30
+6/7 Test #151: t81_vm_ai_predispatch_deny_audit_test ...   Passed    0.01 sec
+test 247
+    Start 247: axion_policy_conformance_matrix_test
+
+247: Test command: /private/tmp/t81-controlled-ai-build/axion_policy_conformance_matrix_test
+247: Working Directory: /private/tmp/t81-controlled-ai-build
+247: Test timeout computed to be: 30
+7/7 Test #247: axion_policy_conformance_matrix_test ....   Passed    0.01 sec
+
+The following tests passed:
+	axion_ai_hooks_test
+	controlled_ai_authorization_test
+	direct_api_authorization_test
+	controlled_ai_evidence_json_test
+	canonfs_policy_boundary_test
+	t81_vm_ai_predispatch_deny_audit_test
+	axion_policy_conformance_matrix_test
+
+100% tests passed, 0 tests failed out of 7
+
+Total Test time (real) =   0.43 sec

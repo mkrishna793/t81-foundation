@@ -1,0 +1,12 @@
+test_duplicate_names_need_a_domain_check (__main__.NC01Contract.test_duplicate_names_need_a_domain_check) ... ok
+test_malformed_json_is_a_separate_parse_failure (__main__.NC01Contract.test_malformed_json_is_a_separate_parse_failure) ... ok
+test_positive_canonical_bytes (__main__.NC01Contract.test_positive_canonical_bytes) ... ok
+test_semantic_change_is_canonical_but_has_changed_input_digest (__main__.NC01Contract.test_semantic_change_is_canonical_but_has_changed_input_digest) ... ok
+test_single_sided_zero_failure_bounds (__main__.NC01Contract.test_single_sided_zero_failure_bounds) ... ok
+test_valid_reordered_json_has_same_value_but_different_bytes (__main__.NC01Contract.test_valid_reordered_json_has_same_value_but_different_bytes) ... ok
+test_whitespace_is_valid_but_not_canonical (__main__.NC01Contract.test_whitespace_is_valid_but_not_canonical) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.003s
+
+OK

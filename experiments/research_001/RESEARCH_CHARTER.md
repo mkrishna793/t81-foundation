@@ -5,7 +5,7 @@
 **Author:** T81 Foundation Research Group
 **Date:** April 2026
 **Version:** v1.1.0 (Corrected Specification)
-**Status:** Active Research Governance Directive
+**Status:** NOT READY for freeze — see [post-merge audit](POST_MERGE_AUDIT.md)
 
 ---
 
@@ -69,7 +69,7 @@ The following table maps all methodological corrections made under this protocol
 
 | Defect ID | Summary Description | Affected Documents | Corrective Action Taken | Validation Method |
 | :--- | :--- | :--- | :--- | :--- |
-| **DEF-01** | NC-01 JSON canonicalization vs syntax error conflation. | `NEGATIVE_CONTROLS.md` | Separated valid JSON key-reordering (`ERR_CANONICAL_HASH_MISMATCH`) from malformed JSON syntax errors (`ERR_JSON_SYNTAX_ERROR`). | Synthetic JSON unit tests in `verify.py`. |
+| **DEF-01** | NC-01 JSON canonicalization vs syntax error conflation. | `NEGATIVE_CONTROLS.md` | Separated valid JSON key-reordering (`ERR_CANONICAL_HASH_MISMATCH`) from malformed JSON syntax errors (`ERR_JSON_SYNTAX_ERROR`). | Audit fixtures in `audit/test_nc01_contract.py`; benchmark `verify.py` remains unimplemented. |
 | **DEF-02** | Ed25519 verification dependency unspecified in Python stdlib. | `BASELINE_SPECIFICATION.md`, `REPRODUCIBILITY.md` | Specified Python `cryptography` package as explicit external dependency with stdlib HMAC-SHA256 fallback option. | Dependency check in `verify.py`. |
 | **DEF-03** | Contradictory Outcome B latency/complexity thresholds ($2\times$ vs $5\times$). | `HYPOTHESES.md`, `STOPPING_CRITERIA.md`, `RESEARCH_PROPOSAL.md` | Harmonized threshold: Arm (iii) achieves equal or lower decision latency and $\ge 5\times$ lower host runtime LOC footprint. | Cross-document consistency review. |
 | **DEF-04** | Negative controls lacked clear fault taxonomy and trust boundaries. | `NEGATIVE_CONTROLS.md` | Classified controls into Malformed Evidence, Malicious Guest Behavior, and Malicious Host Behavior; added NC-08 host boundary control. | Control matrix audit. |

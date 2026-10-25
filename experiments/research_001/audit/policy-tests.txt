@@ -1,0 +1,15 @@
+Test project /private/tmp/t81-pr563-build
+    Start  21: axion_ai_hooks_test
+1/5 Test  #21: axion_ai_hooks_test .....................   Passed    0.26 sec
+    Start  77: canonfs_policy_boundary_test
+2/5 Test  #77: canonfs_policy_boundary_test ............   Passed    0.26 sec
+    Start 148: t81_vm_ai_predispatch_deny_audit_test
+3/5 Test #148: t81_vm_ai_predispatch_deny_audit_test ...   Passed    0.30 sec
+    Start 244: axion_policy_conformance_matrix_test
+4/5 Test #244: axion_policy_conformance_matrix_test ....   Passed    0.29 sec
+    Start 271: axion_policy_bytecode_test
+5/5 Test #271: axion_policy_bytecode_test ..............   Passed    0.25 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =   1.37 sec

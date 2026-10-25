@@ -5,6 +5,7 @@
 #include "t81/axion/policy.hpp"
 #include "t81/axion/policy_engine.hpp"
 #include "t81/canonfs/canon_driver.hpp"
+#include "t81/support/json_string.hpp"
 #include "t81/tracing/canonhash.hpp"
 
 namespace t81::direct_api {
@@ -12,15 +13,16 @@ namespace t81::direct_api {
 // AssessResult JSON serialization
 std::string AssessResult::to_json() const {
   std::ostringstream oss;
+  using t81::support::json_string;
   oss << "{\n";
   oss << "  \"success\": " << (success ? "true" : "false") << ",\n";
-  oss << "  \"decision\": \"" << decision << "\",\n";
-  oss << "  \"reason_code\": \"" << reason_code << "\",\n";
-  oss << "  \"result_ref\": \"" << result_ref << "\",\n";
-  oss << "  \"provenance_ref\": \"" << provenance_ref << "\",\n";
+  oss << "  \"decision\": " << json_string(decision) << ",\n";
+  oss << "  \"reason_code\": " << json_string(reason_code) << ",\n";
+  oss << "  \"result_ref\": " << json_string(result_ref) << ",\n";
+  oss << "  \"provenance_ref\": " << json_string(provenance_ref) << ",\n";
   oss << "  \"execution_time_ms\": " << execution_time_ms << ",\n";
   if (!error_message.empty()) {
-    oss << "  \"error_message\": \"" << error_message << "\",\n";
+    oss << "  \"error_message\": " << json_string(error_message) << ",\n";
   }
   oss << "  \"schema\": \"t81.ai.task.assess-fixed.result.v1\"\n";
   oss << "}";
@@ -34,6 +36,9 @@ T81DirectAPI::~T81DirectAPI() = default;
 bool T81DirectAPI::initialize(const std::string& model_path, const std::string& policy_path,
                               const DirectAPIConfig& config) {
   config_ = config;
+  // A failed or partial reinitialization must not retain a previous backend.
+  ai_backend_.reset();
+  policy_engine_.reset();
 
   auto start = std::chrono::high_resolution_clock::now();
 
@@ -50,6 +55,8 @@ bool T81DirectAPI::initialize(const std::string& model_path, const std::string& 
   }
 
   // Create AI backend with cached policy engine
+  // The previous engine was moved into the backend. Rebuild it even on cache hits.
+  policy_engine_ = std::make_unique<t81::axion::PolicyEngine>(std::make_optional(cached_policy_));
   ai_backend_ = std::make_unique<t81::ai_backend::ControlledAIBackend>(std::move(policy_engine_));
 
   // Configure determinism
@@ -118,6 +125,11 @@ AssessResult T81DirectAPI::assess_fixed_impl(const std::string& input) {
   AssessResult result;
 
   try {
+    if (!ai_backend_) {
+      result.error_message =
+          "ERR_AI_NOT_INITIALIZED: Direct API requires successful initialization";
+      return result;
+    }
     // Create inference request
     t81::ai_backend::InferenceRequest request(
         cached_model_path_,  // Use model hash from cached model
@@ -162,7 +174,7 @@ AssessResult T81DirectAPI::assess_fixed_impl(const std::string& input) {
 }
 
 bool T81DirectAPI::load_model_cached(const std::string& path) {
-  if (config_.cache_models && path == cached_model_path_) {
+  if (config_.cache_models && !cached_model_path_.empty() && path == cached_model_path_) {
     stats_.cache_hits++;
     return true;  // Already cached
   }
@@ -185,7 +197,7 @@ bool T81DirectAPI::load_model_cached(const std::string& path) {
 }
 
 bool T81DirectAPI::load_policy_cached(const std::string& path) {
-  if (config_.cache_policies && path == cached_policy_path_) {
+  if (config_.cache_policies && !cached_policy_path_.empty() && path == cached_policy_path_) {
     stats_.cache_hits++;
     return true;  // Already cached
   }
@@ -210,9 +222,6 @@ bool T81DirectAPI::load_policy_cached(const std::string& path) {
 
     cached_policy_ = policy_result.value();
     cached_policy_path_ = path;
-
-    // Create policy engine
-    policy_engine_ = std::make_unique<t81::axion::PolicyEngine>(std::make_optional(cached_policy_));
 
     std::cout << "✅ Policy loaded and cached: " << path << std::endl;
     return true;

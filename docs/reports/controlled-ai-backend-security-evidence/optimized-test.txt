@@ -1,0 +1,4 @@
+PASS: 30 non-Allow + 12 missing-engine/policy dispatch combinations
+PASS: final evidence and authorization exceptions
+PASS: consent blocks; explicit policy-only Allow dispatches
+PASS: per-operation evidence and request identity

@@ -1,0 +1,12 @@
+syscall=ai.inference.inference caller_empty=1 payload_empty=1 final_authorization=0
+verdict=0 success=1 user_consent=1 current_policy_records=0
+syscall=ai.inference.inference caller_empty=1 payload_empty=1 final_authorization=0
+verdict=1 success=1 user_consent=0 current_policy_records=0
+syscall=ai.inference.inference caller_empty=1 payload_empty=1 final_authorization=0
+verdict=2 success=1 user_consent=0 current_policy_records=0
+syscall=ai.inference.inference caller_empty=1 payload_empty=1 final_authorization=0
+verdict=3 success=1 user_consent=0 current_policy_records=0
+syscall=ai.inference.inference caller_empty=1 payload_empty=1 final_authorization=0
+verdict=4 success=1 user_consent=0 current_policy_records=0
+real_engine_without_policy_success=1 consent=1 previous_record_count=1 current_record_count=0
+null_engine_success=1
