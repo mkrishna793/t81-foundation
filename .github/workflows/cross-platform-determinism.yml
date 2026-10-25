@@ -75,6 +75,12 @@ jobs:
       - name: Build
         run: cmake --build build --parallel
 
+      - name: Run controlled AI authorization tests (Linux)
+        if: matrix.platform == 'linux-x86_64'
+        run: |
+          ctest --test-dir build --output-on-failure --verbose --no-tests=error \
+            -R '^(controlled_ai_authorization_test|direct_api_authorization_test|controlled_ai_evidence_json_test)$'
+
       # ── T81Lang bytecode reproducibility gate ────────────────────────────
       # Compiles each .t81 fixture twice and hashes all outputs into a single
       # aggregate SHA-256.  Two platforms with identical hashes = bit-exact

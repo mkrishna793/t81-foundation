@@ -1,11 +1,50 @@
 #include "t81/ai_backend/controlled_ai_backend.hpp"
+#include <bit>
 #include <chrono>
 #include <random>
+#include <span>
 #include <sstream>
 #include "t81/axion/context.hpp"
 #include "t81/axion/policy_engine.hpp"
+#include "t81/crypto/sha3.hpp"
+#include "t81/support/json_string.hpp"
 
 namespace t81::ai_backend {
+
+namespace {
+using t81::support::json_string;
+
+std::string verdict_name(t81::axion::VerdictKind kind) {
+  using K = t81::axion::VerdictKind;
+  switch (kind) {
+    case K::Allow:
+      return "Allow";
+    case K::Deny:
+      return "Deny";
+    case K::Defer:
+      return "Defer";
+    case K::Warn:
+      return "Warn";
+    case K::Quarantine:
+      return "Quarantine";
+  }
+  return "Unknown";
+}
+
+// Length-prefixed request identity, not a consent proof or policy evaluation.
+std::string request_digest(const InferenceRequest& request, const std::string& mode,
+                           const std::string& target) {
+  std::string framed;
+  for (const auto& field : {std::string("t81.controlled-ai.request.v1"), request.model_hash,
+                            std::to_string(request.input_tokens),
+                            std::to_string(std::bit_cast<uint32_t>(request.temperature)),
+                            request.input_text, mode, target}) {
+    framed += std::to_string(field.size()) + ":" + field;
+  }
+  return "sha3-512:" + t81::crypto::sha3_512_hex(std::span<const uint8_t>(
+                           reinterpret_cast<const uint8_t*>(framed.data()), framed.size()));
+}
+}  // namespace
 
 // Controlled randomness generator for reproducible non-determinism
 class ControlledRandomness {
@@ -38,38 +77,46 @@ public:
 
 std::string AIOperationEvidence::to_json() const {
   std::ostringstream json;
-  json << "{\n";
-  json << "  \"operation_id\": \"" << operation_id << "\",\n";
-  json << "  \"operation_type\": \"" << operation_type << "\",\n";
-  json << "  \"determinism_level\": \"" << determinism_level << "\",\n";
-  json << "  \"user_consent\": " << (user_consent ? "true" : "false") << ",\n";
-  json << "  \"external_ai_used\": " << (external_ai_used ? "true" : "false") << ",\n";
-
-  json << "  \"metadata\": {\n";
+  json << "{\n  \"operation_id\": " << json_string(operation_id)
+       << ",\n  \"operation_type\": " << json_string(operation_type)
+       << ",\n  \"determinism_level\": " << json_string(determinism_level)
+       << ",\n  \"user_consent\": " << (user_consent ? "true" : "false")
+       << ",\n  \"external_ai_used\": " << (external_ai_used ? "true" : "false")
+       << ",\n  \"policy_authorized\": " << (policy_authorized ? "true" : "false")
+       << ",\n  \"inference_dispatched\": " << (inference_dispatched ? "true" : "false")
+       << ",\n  \"failure_reason\": " << json_string(failure_reason)
+       << ",\n  \"authorization_verdict\": ";
+  if (authorization_verdict) {
+    json << "{\"kind\":" << json_string(verdict_name(authorization_verdict->kind))
+         << ",\"kind_value\":" << static_cast<int>(authorization_verdict->kind)
+         << ",\"reason\":" << json_string(authorization_verdict->reason) << "}";
+  } else {
+    json << "null";
+  }
+  json << ",\n  \"metadata\": {";
+  bool first = true;
   for (const auto& [key, value] : metadata) {
-    json << "    \"" << key << "\": \"" << value << "\"";
-    if (&value != &metadata.rbegin()->second) json << ",";
-    json << "\n";
+    if (!first) json << ",";
+    first = false;
+    json << "\n    " << json_string(key) << ": " << json_string(value);
   }
-  json << "  },\n";
-
-  json << "  \"policy_decisions\": [\n";
+  json << "\n  },\n  \"policy_decisions\": [";
   for (size_t i = 0; i < policy_decisions.size(); ++i) {
-    json << "    \"" << policy_decisions[i] << "\"";
-    if (i + 1 < policy_decisions.size()) json << ",";
-    json << "\n";
+    if (i) json << ",";
+    json << "\n    " << json_string(policy_decisions[i]);
   }
-  json << "  ]\n";
-  json << "}\n";
+  json << "\n  ]\n}\n";
   return json.str();
 }
 
 ControlledAIBackend::ControlledAIBackend(std::unique_ptr<t81::axion::PolicyEngine> policy_engine,
                                          std::optional<std::string> external_ai_endpoint,
-                                         std::optional<std::string> external_ai_auth_token)
+                                         std::optional<std::string> external_ai_auth_token,
+                                         bool require_user_consent)
     : policy_engine_(std::move(policy_engine)),
       external_ai_endpoint_(external_ai_endpoint),
-      external_ai_auth_token_(external_ai_auth_token) {
+      external_ai_auth_token_(external_ai_auth_token),
+      require_user_consent_(require_user_consent) {
   auto now = std::chrono::steady_clock::now();
   auto seed = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
   randomness_ = std::make_unique<ControlledRandomness>(seed, false);
@@ -94,21 +141,49 @@ std::string ControlledAIBackend::generate_operation_id() const {
   return "ai_op_" + std::to_string(++counter);
 }
 
-bool ControlledAIBackend::check_policy_consent(const std::string& operation_type) {
-  if (!policy_engine_) return false;
-
+bool ControlledAIBackend::authorize(const InferenceRequest& request,
+                                    AIOperationEvidence& evidence) {
   t81::axion::SyscallContext ctx;
-  ctx.syscall = "ai.inference." + operation_type;
+  ctx.caller = "controlled_ai_backend";
+  ctx.syscall = "ai.inference.inference";  // Preserve the existing syscall identifier.
+  const bool external = external_ai_endpoint_ && external_ai_auth_token_;
+  evidence.metadata["dispatch_kind"] = external ? "external_simulated" : "local_controlled";
+  ctx.payload = request_digest(
+      request, evidence.determinism_level,
+      external ? "external_simulated:" + *external_ai_endpoint_ : "local_controlled");
+  ctx.final_authorization = true;
+  ctx.policy = policy_engine_ ? policy_engine_->active_policy() : nullptr;
+  evidence.metadata["authorization_caller"] = ctx.caller;
+  evidence.metadata["authorization_syscall"] = ctx.syscall;
+  evidence.metadata["authorization_payload"] = ctx.payload;
+  evidence.metadata["final_authorization"] = "true";
+  evidence.metadata["active_policy"] = ctx.policy ? "true" : "false";
+  evidence.metadata["consent_status"] = "unverified";
+  evidence.metadata["consent_required"] = require_user_consent_ ? "true" : "false";
 
-  auto verdict = policy_engine_->evaluate(ctx);
-  bool allowed = (verdict.kind == t81::axion::VerdictKind::Allow);
-
-  if (evidence_log_.size() > 0) {
-    evidence_log_.back().policy_decisions.push_back(
-        std::string(allowed ? "allow" : "deny") + ": " + verdict.reason);
+  evidence.metadata["authorization_status"] = "not_evaluated";
+  if (!policy_engine_) {
+    evidence.policy_decisions.push_back("NotEvaluated: Missing policy engine");
+    evidence.failure_reason = "ERR_AI_POLICY_ENGINE_MISSING: Missing policy engine";
+    return false;
   }
-
-  return allowed;
+  evidence.metadata["authorization_status"] = "evaluating";
+  const auto verdict = policy_engine_->evaluate(ctx);
+  evidence.metadata["authorization_status"] = "evaluated";
+  evidence.authorization_verdict = verdict;
+  evidence.policy_decisions.push_back(verdict_name(verdict.kind) + ": " + verdict.reason);
+  evidence.policy_authorized = ctx.policy && verdict.kind == t81::axion::VerdictKind::Allow;
+  if (!evidence.policy_authorized) {
+    evidence.failure_reason =
+        "ERR_AI_AUTHORIZATION_DENIED: " + verdict_name(verdict.kind) + ": " + verdict.reason;
+    if (!ctx.policy) evidence.failure_reason += " (active policy required)";
+    return false;
+  }
+  if (require_user_consent_) {
+    evidence.failure_reason = "ERR_AI_CONSENT_UNSUPPORTED: No verified user-consent contract";
+    return false;
+  }
+  return true;
 }
 
 template <typename T>
@@ -129,8 +204,6 @@ InferenceResult ControlledAIBackend::inference(const InferenceRequest& request) 
   evidence.operation_id = current_operation_id_;
   evidence.operation_type = "inference";
   evidence.determinism_level = randomness_ && randomness_->is_enabled() ? "controlled" : "strict";
-  evidence.user_consent = check_policy_consent("inference");
-  evidence.external_ai_used = external_ai_endpoint_.has_value();
 
   evidence.metadata["model_hash"] = request.model_hash;
   evidence.metadata["input_tokens"] = std::to_string(request.input_tokens);
@@ -139,29 +212,44 @@ InferenceResult ControlledAIBackend::inference(const InferenceRequest& request) 
   InferenceResult result;
 
   try {
-    if (external_ai_endpoint_ && external_ai_auth_token_) {
+    if (!authorize(request, evidence)) {
+      result.error_message = evidence.failure_reason;
+    } else if (external_ai_endpoint_ && external_ai_auth_token_) {
       result = inference_with_external_ai(request, evidence);
     } else {
       result = inference_with_controlled_randomness(request, evidence);
     }
 
-    evidence.metadata["success"] = "true";
+    evidence.metadata["success"] = result.success ? "true" : "false";
     evidence.metadata["output_tokens"] = std::to_string(result.output_tokens);
 
   } catch (const std::exception& e) {
     evidence.metadata["success"] = "false";
-    evidence.metadata["error"] = e.what();
+    evidence.failure_reason = std::string("ERR_AI_OPERATION_FAILED: ") + e.what();
     result.success = false;
-    result.error_message = e.what();
+    result.error_message = evidence.failure_reason;
+  } catch (...) {
+    evidence.metadata["success"] = "false";
+    evidence.failure_reason = "ERR_AI_OPERATION_FAILED: Unknown exception";
+    result.error_message = evidence.failure_reason;
   }
 
-  evidence_log_.push_back(evidence);
+  if (!result.success) evidence.metadata["error"] = result.error_message;
+  if (evidence.policy_decisions.empty()) {
+    evidence.policy_decisions.push_back((evidence.metadata["authorization_status"] == "evaluating"
+                                             ? "EvaluationError: "
+                                             : "NotEvaluated: ") +
+                                        evidence.failure_reason);
+  }
+  evidence_log_.push_back(std::move(evidence));
 
   return result;
 }
 
 InferenceResult ControlledAIBackend::inference_with_external_ai(const InferenceRequest& request,
                                                                 AIOperationEvidence& evidence) {
+  evidence.inference_dispatched = true;
+  evidence.external_ai_used = true;
   evidence.metadata["ai_service"] = *external_ai_endpoint_;
 
   return with_controlled_randomness<InferenceResult>([&](ControlledRandomness& rng) {
@@ -184,6 +272,7 @@ InferenceResult ControlledAIBackend::inference_with_external_ai(const InferenceR
 
 InferenceResult ControlledAIBackend::inference_with_controlled_randomness(
     const InferenceRequest& request, AIOperationEvidence& evidence) {
+  evidence.inference_dispatched = true;
   evidence.metadata["ai_service"] = "local_controlled";
 
   return with_controlled_randomness<InferenceResult>([&](ControlledRandomness& rng) {
@@ -227,7 +316,8 @@ void ControlledAIBackend::clear_evidence_log() { evidence_log_.clear(); }
 std::unique_ptr<ControlledAIBackend> create_controlled_ai_backend(
     std::unique_ptr<t81::axion::PolicyEngine> policy_engine, const AIBackendConfig& config) {
   auto backend = std::make_unique<ControlledAIBackend>(
-      std::move(policy_engine), config.external_ai_endpoint, config.external_ai_auth_token);
+      std::move(policy_engine), config.external_ai_endpoint, config.external_ai_auth_token,
+      config.require_user_consent);
 
   backend->set_determinism_level(config.determinism_level);
 

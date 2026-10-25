@@ -7,6 +7,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include "t81/axion/verdict.hpp"
 
 // Forward declaration outside namespace
 namespace t81::axion {
@@ -43,7 +44,9 @@ struct AIBackendConfig {
   std::string determinism_level = "strict";  // strict | controlled | permissive
   std::optional<std::string> external_ai_endpoint = std::nullopt;
   std::optional<std::string> external_ai_auth_token = std::nullopt;
-  bool evidence_collection = true;
+  bool evidence_collection = true;  // Security decisions are always retained.
+  // No verified-consent contract exists yet. true blocks dispatch, even on Allow.
+  // false explicitly selects policy-only operation, not verified user consent.
   bool require_user_consent = true;
 };
 
@@ -54,10 +57,14 @@ struct AIOperationEvidence {
   std::string operation_id;
   std::string operation_type;
   std::string determinism_level;
-  bool user_consent;
-  bool external_ai_used;
+  bool user_consent = false;  // Never inferred from policy approval.
+  bool external_ai_used = false;
   std::map<std::string, std::string> metadata;
   std::vector<std::string> policy_decisions;
+  std::optional<t81::axion::Verdict> authorization_verdict;
+  bool policy_authorized = false;
+  bool inference_dispatched = false;
+  std::string failure_reason;
 
   std::string to_json() const;
 };
@@ -67,7 +74,8 @@ class ControlledAIBackend {
 public:
   ControlledAIBackend(std::unique_ptr<t81::axion::PolicyEngine> policy_engine,
                       std::optional<std::string> external_ai_endpoint = std::nullopt,
-                      std::optional<std::string> external_ai_auth_token = std::nullopt);
+                      std::optional<std::string> external_ai_auth_token = std::nullopt,
+                      bool require_user_consent = true);
   ~ControlledAIBackend();
 
   // Configuration
@@ -88,7 +96,7 @@ private:
   InferenceResult inference_with_controlled_randomness(const InferenceRequest& request,
                                                        AIOperationEvidence& evidence);
 
-  bool check_policy_consent(const std::string& operation_type);
+  bool authorize(const InferenceRequest& request, AIOperationEvidence& evidence);
   std::string generate_operation_id() const;
 
   template <typename T>
@@ -101,6 +109,7 @@ private:
 
   std::optional<std::string> external_ai_endpoint_;
   std::optional<std::string> external_ai_auth_token_;
+  bool require_user_consent_ = true;
 };
 
 // Factory function
