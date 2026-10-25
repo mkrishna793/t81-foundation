@@ -1,0 +1,12 @@
+Test project /private/tmp/t81-pr563-build
+    Start 6: t81_vm_decoder_test
+1/1 Test #6: t81_vm_decoder_test ..............***Timeout  45.03 sec
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =  45.04 sec
+
+The following tests FAILED:
+	  6 - t81_vm_decoder_test (Timeout)
+Errors while running CTest
