@@ -14,13 +14,14 @@
 
 The T81 Foundation repository represents an **experimental scientific research framework and software engineering substrate** focused on two main research domains:
 
-1. **Track R (Scientific Computing & Alternative Representations):** Investigating whether ternary arithmetic, balanced ternary representations, Base-81 digit grouping, SWAR vectorization, or 2-bit packed weight formats produce measurable or theoretically defensible computational, storage, or execution advantages over equivalent binary systems.
-2. **Track F (Foundation Systems Engineering & Governance):** Building and evaluating deterministic virtual execution, content-addressed artifact storage (CanonFS), pre-side-effect policy authorization (Axion), immutable execution provenance, and detached accountable evidence verification (RFC-00D4).
+1. **Track R (Scientific Computing & Alternative Representations):** Investigating whether ternary arithmetic, balanced ternary representations, Base-81 digit grouping, adaptive tiering, 3-state logic primitives, or ternary weight formats produce measurable or theoretically defensible computational, storage, or execution advantages over equivalent binary systems (Canonical Hypotheses H01–H06).
+2. **Track F (Foundation Systems Engineering & Governance):** Building and evaluating deterministic virtual execution, content-addressed artifact storage (CanonFS), pre-side-effect policy authorization (Axion), immutable execution provenance, and detached accountable evidence verification (Canonical Hypothesis H07).
+3. **Track M (AI-Assisted Research Methodology):** Evaluating prompt-to-code provenance, error rate tracking, and trustworthy research iteration under AI assistance (Canonical Hypothesis H08).
 
 ### Key Reassessment Findings
 
-- **Ternary CPU Arithmetic Advantage is Falsified & Frozen:** Software ternary arithmetic, Base-81 tryte grouping, and 2-bit packed ternary CPU matrix multiplication (MatVec) on general-purpose binary ALUs do **not** outperform standard binary integer or floating-point SIMD pipelines. While 2-bit weight packing saves 75% memory bandwidth, SIMD bit-shuffle decode instruction overhead limits execution speed to 75.3% of INT8 AVX2 in cache (`experiments/packed_ternary_matvec/`). Software CPU ternary optimization is formally **frozen (STOP status)**. 2-bit packing is retained strictly as an efficient on-disk weight storage and interchange format.
-- **Accountable Computation is a Protocol, Not a VM:** Comparative experiments (`examples/governance/accountable-computation/` and `experiments/research_001/`) demonstrate that pre-side-effect policy enforcement and offline auditability do not inherently require a custom virtual machine (T81VM/TISC). A conventional WebAssembly runtime (Wasmtime) with host FFI capability boundaries and detached canonical evidence bundles (RFC-00D4) achieves equal 0.0% policy breach rates and 100% offline auditability with lower system complexity.
+- **Software CPU Ternary Emulation is Falsified & Frozen:** Software ternary arithmetic, Base-81 tryte grouping on binary ALUs, and 2-bit packed ternary CPU matrix multiplication (MatVec) decoding on general-purpose binary vector units do **not** outperform standard binary integer or floating-point SIMD pipelines in execution speed. While 2-bit weight packing saves 75% memory bandwidth, SIMD bit-shuffle decode instruction overhead limits execution speed to 75.3% of INT8 AVX2 in L1/L2 cache (`experiments/packed_ternary_matvec/`). Software CPU ternary optimization is formally **frozen (STOP status)**. This negative finding is scoped strictly to software emulation on binary hardware and does not disprove physical ternary hardware or alternative device representations. 2-bit packing is retained strictly as an efficient on-disk weight storage and interchange format.
+- **Accountable Computation is a Protocol, Not a Runtime Requirement:** Comparative experiments (`examples/governance/accountable-computation/` and `experiments/research_001/`) demonstrate that pre-side-effect policy enforcement and offline auditability do not inherently require a custom virtual machine (T81VM/TISC). A conventional WebAssembly runtime (Wasmtime) with host FFI capability boundaries and detached canonical evidence bundles (RFC-00D4) achieves equal 0.0% policy breach rates under test conditions and detached evidence auditability with lower system complexity.
 - **Deterministic AI Execution & Provenance is the Primary Validated Capability:** T81's strongest, most defensible contribution is its bit-exact cross-platform determinism engine (DCP), soft-float transcendentals (RFC-0030), content-addressed artifact file system (CanonFS / RFC-00D1), and fail-closed policy authorization engine (Axion).
 - **Architectural Framing Shift:** The project is correctly understood as a hypothesis-driven empirical research experiment, not a commercial desktop operating system or a native ternary hardware platform.
 
@@ -81,82 +82,71 @@ The historical progression of the T81 computational concepts spans four distinct
 
 ---
 
-## D. Hypothesis Assessment (H01–H08 Register)
+## D. Hypothesis Assessment (Master Canonical H01–H08 Register)
 
-The project evaluates eight central hypotheses under its research charter:
+The project evaluates eight canonical hypotheses under its Master Continuity Charter (`docs/research/continuity/MASTER_CONTINUITY_CHARTER_v1.0.md` and `docs/research/continuity/HYPOTHESIS_REGISTER_v1.json`). Canonical identifiers and statements are preserved as authoritative:
 
-### H01: Ternary ALU & Software Arithmetic Advantage
-- **Motivation:** Explore whether 3-valued balanced ternary logic provides higher arithmetic density or faster addition.
-- **Formal Claim:** Fixed-width Base-81 software tryte addition on binary ALUs outperforms 64-bit binary ALU integer addition.
-- **Implementation Status:** Tested in `experiments/radix_comparison/` (`t81_radix_comparison_test`).
-- **Supporting / Contradictory Evidence:** Grouping 4 trits into Base-81 trytes reduced software addition latency from $105.3\text{ ns}$ down to $11.7\text{ ns}$. However, binary 64-bit ALU addition takes $1.1\text{ ns}$ ($10.6\times$ faster).
-- **Binary Baseline:** 64-bit binary integer addition on native CPU ALU.
-- **Assumptions & Limits:** Emulated software ternary on binary ALUs incurs masking/shifting overhead.
-- **Confidence Level:** High ($100\%$ falsified for software CPU arithmetic).
-- **Decision / Status:** **FALSIFIED / FROZEN**.
+### H01: Native Ternary Storage & Logic Cost Reduction (Track R)
+- **Formal Claim:** Native ternary storage or logic can reduce normalized cost at equal information capacity compared to binary alternatives.
+- **Canonical Domain:** Track R — Scientific Computing & Alternative Representations.
+- **Implementation & Evidence Status:** Mathematical density is established ($\log_2 3 \approx 1.585$ bits/trit), but physical hardware implementation remains open. Software emulation on binary ALUs (`experiments/radix_comparison/`) proved software tryte addition is $10.6\times$ slower ($11.7\text{ ns}$ vs $1.1\text{ ns}$) than 64-bit binary ALU addition.
+- **Scope & Scope Boundary:** Software CPU ternary arithmetic is **falsified for speed and frozen (STOP)** on general-purpose binary ALUs. Physical hardware density and specialized device claims remain open.
 
-### H02: SWAR & Base-81 SIMD Vectorization Advantage
-- **Motivation:** Test SWAR (Simd Within A Register) for parallel ternary operations (`TNOT_SWAR`, `TAND_SWAR`, `TOR_SWAR`).
-- **Formal Claim:** SWAR ternary vector operations provide higher compute throughput on binary vector units than packed binary SIMD.
-- **Implementation Status:** Implemented in `include/t81/codec/base81_packed.hpp` and `src/core/codec/base81_packed.cpp`.
-- **Supporting / Contradictory Evidence:** SWAR allows parallel tryte manipulation, but digit decoding and bit-shuffling tax offsets parallel ALU gains on general binary hardware.
-- **Binary Baseline:** AVX2 / NEON 8-bit / 16-bit binary SIMD vector operations.
-- **Confidence Level:** High.
-- **Decision / Status:** **FALSIFIED / FROZEN**.
+### H02: Balanced Ternary Signed Arithmetic & Rounding (Track R)
+- **Formal Claim:** Balanced ternary representation improves signed integer arithmetic or rounding properties.
+- **Canonical Domain:** Track R — Scientific Computing & Alternative Representations.
+- **Implementation & Evidence Status:** Algebraic symmetry around zero eliminates offset bias. SWAR SIMD emulation (`TNOT_SWAR`, `TAND_SWAR`, `TOR_SWAR` in `include/t81/codec/base81_packed.hpp`) was tested on binary vector units, but digit-unpacking tax offsets SIMD density gains on binary hardware.
+- **Scope & Scope Boundary:** Algebraic properties established; software SWAR execution on binary vector units is **falsified for speed and frozen**.
 
-### H03: Packed 2-Bit Ternary Model Inference / MatVec Advantage
-- **Motivation:** Evaluate 1.58-bit / ternary neural network weight matrix-vector multiplication ($W \in \{-1, 0, 1\}$).
-- **Formal Claim:** On-the-fly 2-bit packed ternary weight decoding accelerates CPU MatVec throughput beyond INT8 AVX2/NEON.
-- **Implementation Status:** Implemented in `experiments/packed_ternary_matvec/` (`t81_packed_ternary_matvec_oracle_test`).
-- **Supporting / Contradictory Evidence:** VPSHUFB nibble lookup table decoding achieves $12.91\text{ GFLOP/s}$ on $4096^2$ matrices, saving $75\%$ DRAM bandwidth. However, execution speed reaches only $75.3\%$ of INT8 AVX2 ($17.15\text{ GFLOP/s}$) due to SIMD bit-shuffle decode instruction tax in L1/L2 cache.
-- **Binary Baseline:** INT8 AVX2 / NEON vector dot product (`vpdpbusd` / `vdot`).
-- **Confidence Level:** High ($100\%$ verified).
-- **Decision / Status:** **FALSIFIED for execution speed; REVISED for weight storage format**.
+### H03: Base-81 Digit Grouping & Representation Interface (Track R)
+- **Formal Claim:** Base-81 4-trit digit grouping yields system-level performance or representation interface advantages.
+- **Canonical Domain:** Track R — Scientific Computing & Alternative Representations.
+- **Implementation & Evidence Status:** 4-trit grouping reduces software tryte addition latency from $105.3\text{ ns}$ down to $11.7\text{ ns}$ compared to un-grouped software trits. On-the-fly 2-bit packed ternary weight MatVec (`experiments/packed_ternary_matvec/`) saves $75\%$ DRAM bandwidth ($0.25$ bytes/weight), but SIMD VPSHUFB bit-shuffle decode tax limits execution speed to $75.3\%$ of INT8 AVX2 ($12.91$ vs $17.15\text{ GFLOP/s}$) in cache.
+- **Scope & Scope Boundary:** System-level 4-trit interface mathematical; 2-bit weight packing **validated for storage reduction; falsified for CPU MatVec execution speed in L1/L2 cache**.
 
-### H04: Custom ISA/VM Necessity for Accountable Computation
-- **Motivation:** Determine whether policy-gated execution requires a custom ISA and VM.
-- **Formal Claim:** A bespoke VM (T81VM/TISC) is required to guarantee pre-side-effect policy evaluation and evidence generation.
-- **Implementation Status:** Tested in `examples/governance/accountable-computation/` and `experiments/research_001/`.
-- **Supporting / Contradictory Evidence:** Wasmtime + OPA host capability baseline (Arm iii / Baseline-X) achieved identical $0.0\%$ breach rates under mid-flight policy revocation and $100\%$ detached evidence auditability with $10\times$ lower host C++ LOC.
-- **Binary Baseline:** Wasmtime + Open Policy Agent + RFC-00D4 Evidence Schema.
-- **Confidence Level:** High.
-- **Decision / Status:** **REVISED / UNFOUNDED as a necessity (Accountable computation is a Protocol, Not a Runtime)**.
+### H04: Adaptive Representation Tiering (Track R)
+- **Formal Claim:** Adaptive T81/T243/T729 capacity tiering achieves lower cost than fixed representation.
+- **Canonical Domain:** Track R — Scientific Computing & Alternative Representations.
+- **Implementation & Evidence Status:** Historical Hanoi tiering heuristics exist in `experimental/hanoi/`. Re-specified under **H04-R01 (Radix × Adaptation Discriminator)** as a $2\times2$ exact trace model (Fixed/Adaptive Binary vs Fixed/Adaptive Ternary).
+- **Scope & Scope Boundary:** Hanoi heuristic exists; optimization unproven. H04-R01 provides conditional model support with explicit counterexamples (e.g. $M=256$, $C_3/C_2=1.5$ yields higher cost for ternary), not physical hardware proof.
 
-### H05: Inner-Dispatch Policy Governance Coupling
-- **Motivation:** Test whether policy evaluation must occur inside the VM inner execution loop.
-- **Formal Claim:** `eval_axion_call` inside `AgentInvoke` / `WLoad` dispatch prevents unauthorized side effects before state mutation.
-- **Implementation Status:** Implemented in `src/axion/` and `src/vm/vm.cpp` (`t81_vm_predispatch_policy_deny_logging_test`).
-- **Supporting / Contradictory Evidence:** In-kernel pre-dispatch policy evaluation strictly prevents side effects ($0.0\%$ breach rate). However, host FFI boundaries in Wasm provide equivalent fail-closed isolation.
-- **Binary Baseline:** Host FFI import boundary / API gateway pre-commit hook.
-- **Confidence Level:** High.
-- **Decision / Status:** **ESTABLISHED for in-VM execution; REVISED for universal architecture**.
+### H05: Three-State Algebra Primitives & Architectures (Track R)
+- **Formal Claim:** Specified three-state primitives reduce circuit or system cost compared to an equivalent Boolean implementation.
+- **Canonical Domain:** Track R — Scientific Computing & Alternative Representations.
+- **Implementation & Evidence Status:** Evaluated in hardware RTL (`rtl/core/t81_top.sv`) and software VM in-kernel policy coupling (`src/axion/` and `src/vm/vm.cpp`). In-VM pre-dispatch policy evaluation (`eval_axion_call`) prevents unauthorized side effects ($0.0\%$ breach rate under test conditions).
+- **Scope & Scope Boundary:** Exploratory. In-VM policy evaluation is established for T81VM, but host capability boundaries in Wasm provide equivalent protection.
 
-### H06: Monolithic Stack vs. Detached Protocol Evidence
-- **Motivation:** Evaluate whether accountable computation requires a vertically integrated stack (TISC + Axion + CanonFS).
-- **Formal Claim:** Auditability requires the complete monolithic T81 stack at both creation and verification time.
-- **Implementation Status:** Evaluated via RFC-00D4 evidence schemas and `verify.py`.
-- **Supporting / Contradictory Evidence:** Detached JSON evidence bundles (RFC-00D4) verified via standalone Python/CLI tools achieve $100\%$ offline auditability across heterogeneous hosts without running T81VM.
-- **Binary Baseline:** Standalone CLI verification tools using RFC 8785 canonical JSON and Ed25519 signatures.
-- **Confidence Level:** High.
-- **Decision / Status:** **REVISED (Detached evidence schemas are superior for system interoperability)**.
+### H06: Ternary Weights & Activations for AI Inference (Track R)
+- **Formal Claim:** Ternary weights or activations improve accuracy-constrained inference versus equally optimized binary low-bit alternatives.
+- **Canonical Domain:** Track R — Scientific Computing & Alternative Representations.
+- **Implementation Status & Evidence:** On-disk 2-bit weight format (`.t81w`) and detached evidence verification (RFC-00D4) implemented in `tools/cli/ai/` and `examples/governance/accountable-computation/`.
+- **Scope & Scope Boundary:** Plausible domain for storage and memory-bandwidth constrained inference; CPU execution speedup disproven on binary SIMD.
 
-### H07: Bit-Exact Cross-Platform Execution Determinism (DCP)
-- **Motivation:** Provide bit-identical state machine replication across x86_64, ARM64, and WebAssembly.
-- **Formal Claim:** T81VM with soft-float transcendentals (RFC-0030 CORDIC/Minimax) guarantees bit-exact cross-platform execution.
-- **Implementation Status:** Implemented in `src/core/isa/math/t81_soft_math/` and `tests/determinism/`.
-- **Supporting / Contradictory Evidence:** $100\%$ pass rate on cross-platform property-based determinism tests (`tests/cpp/vm_determinism_property_test.cpp`).
-- **Binary Baseline:** Host C/C++ `libm` IEEE 754 default floating-point execution.
-- **Confidence Level:** High.
-- **Decision / Status:** **ESTABLISHED for Deterministic Core Profile (DCP)**.
+### H07: Representation-Independent Governed Execution (Track F)
+- **Formal Claim:** Representation-independent governed execution improves auditability, pre-side-effect policy enforcement, and deterministic execution trace replay.
+- **Canonical Domain:** Track F — Foundation Systems & Governance Engineering.
+- **Implementation Status & Evidence:** Implemented and validated in T81VM Deterministic Core Profile (DCP), soft-float transcendentals (RFC-0030 CORDIC math), CanonFS content addressing (RFC-00D1), and detached evidence bundles (RFC-00D4).
+- **Scope & Scope Boundary:** **Established for DCP determinism, CanonFS byte identity, and detached evidence auditability**. Proves that accountable computation is a runtime-agnostic protocol, not a custom VM requirement.
 
-### H08: Content-Addressed Artifact Identity & Immutable Provenance (CanonFS)
-- **Motivation:** Provide cryptographic content addressing for programs, tensors, policies, and evidence.
-- **Formal Claim:** Content-addressed storage (CanonFS / RFC-00D1) delivers immutable artifact identity and foreign filesystem interchange.
-- **Implementation Status:** Implemented in `src/core/fs/` (`canonfs_identity_contract_test`, `canonfs_policy_boundary_test`).
-- **Supporting / Contradictory Evidence:** CanonFS import/export and CanonHash-81 hashing successfully verify byte integrity across platforms.
-- **Binary Baseline:** Path-based filesystems and standard SHA-256 integrity metadata.
-- **Confidence Level:** High.
-- **Decision / Status:** **ESTABLISHED for byte identity and storage integrity**.
+### H08: AI-Assisted Iterative Research & Trustworthy Discovery (Track M)
+- **Formal Claim:** AI-assisted research iteration improves trustworthiness and discovery under an independently auditable process.
+- **Canonical Domain:** Track M — AI-Assisted Research Methodology.
+- **Implementation Status & Evidence:** Methodological process tracking prompt-to-code provenance, error rate recording, session handoffs, and CanonFS artifact lineage across research iterations.
+- **Scope & Scope Boundary:** **Established for provenance tracking and session continuity**.
+
+---
+
+### E. Historical Experiment Evidence Mapping
+
+To maintain clarity without renumbering or altering the canonical H01–H08 register, empirical benchmark experiments in the repository map to the hypothesis framework as follows:
+
+| Benchmark / Experiment | Target Surface / Command | Evaluated Hypotheses | Primary Findings & Scoped Verdicts |
+| :--- | :--- | :--- | :--- |
+| **Radix Comparison** | `experiments/radix_comparison/` | **H01, H03** | Software tryte addition is $10.6\times$ slower than native 64-bit binary ALU addition. Falsifies software CPU ternary arithmetic speedup. |
+| **Packed Ternary MatVec** | `experiments/packed_ternary_matvec/` | **H02, H03, H06** | 2-bit packed weight format saves $75\%$ memory footprint, but SIMD bit-shuffle decode tax limits execution speed to $75.3\%$ of INT8 AVX2 in cache. |
+| **Accountable Computation (Baseline-X)** | `examples/governance/accountable-computation/` & `experiments/research_001/` | **H04, H05, H06, H07** | Wasmtime + OPA host FFI capability baseline (Arm iii) achieves identical $0.0\%$ breach rates and $100\%$ detached evidence auditability with $10\times$ lower host C++ LOC. Proves accountable computation is a protocol, not a runtime requirement. |
+| **Cross-Platform Determinism (DCP)** | `tests/cpp/vm_determinism_property_test.cpp` | **H07** | Bit-exact cross-platform execution and RFC-0030 soft-float transcendentals pass $100\%$ of property-based tests across x86_64, ARM64, and WebAssembly. |
+| **CanonFS Byte Identity & Interchange** | `src/core/fs/` & CTest #84–85 | **H07, H08** | Content-addressed storage (CanonHash-81) and foreign filesystem interchange (RFC-00D1) deliver immutable byte identity across systems. |
 
 ---
 
@@ -199,25 +189,24 @@ An audit of claims in former documentation against implemented code and test evi
 
 ---
 
-## H. Next Discriminating Experiment
+## H. Next Discriminating Experiments & Research Sequence
 
-### Title
-**Cross-Platform Bit-Identical Deterministic AI Execution & Trace Provenance Parity (Candidate 3)**
+Research experiments proceed along established sequence tracks defined in the Master Continuity Charter:
 
-### Objective
-Determine whether T81's Deterministic Math Subsystem (RFC-0030 soft-float transcendentals) and Canonical Trace Cache (RFC-0028) can achieve **100% bit-identical execution trace parity** across x86_64, ARM64, and WebAssembly targets under Axion policy governance, while incurring a **$<5\%$ runtime performance tax** relative to non-deterministic host `libm` floating-point execution.
+### 1. Track R Research Sequence: H04-R01 & H04-R02 (Adaptive Representation Discriminator)
 
-### Experimental Design
-1. **Target Subsystems:** `tests/determinism/` and `vm/determinism/`.
-2. **Evaluation Workload:** Softmax, LayerNorm, and multi-layer MLP token generation execution traces across $100,000$ adversarial floating-point inputs (including subnormals, NaNs, infinities, and extreme exponents).
-3. **Comparison Baseline:** Host IEEE 754 floating-point `libm` execution on x86_64, ARM64, and WebAssembly.
-4. **Independent Oracle:** Bitwise hash comparison of execution traces using `CanonHash81`.
-5. **Acceptance Criteria:**
-   - Bitwise trace equality: `CanonHash81(Trace_x86_64) == CanonHash81(Trace_ARM64) == CanonHash81(Trace_WASM)`.
-   - Execution latency tax: $\frac{\text{Latency}_{\text{DeterministicSoftFloat}} - \text{Latency}_{\text{HostLibm}}}{\text{Latency}_{\text{HostLibm}}} \times 100\% < 5.0\%$.
-6. **Stopping Conditions:**
-   - If bitwise trace equality fails on any input, halt and record numeric drift bug.
-   - If execution tax exceeds $20.0\%$, trigger lookup-table soft-float optimization.
+- **H04-R01 Packet Status (Conditional Support):** H04-R01 specifies a $2\times2$ exact trace discriminator (Fixed Binary, Adaptive Binary, Fixed Ternary, Adaptive Ternary) to separate radix effects from adaptive precision. Stage 1 evaluations (`docs/research/continuity/H04_RADIX_ADAPTATION_DISCRIMINATOR.md` and `docs/research/continuity/probes/storage_boundary.py`) establish **conditional mathematical model support with explicit counterexamples** (e.g. at capacity $M=256$ and per-element cost ratio $C_3/C_2=1.5$, ternary requires 6 trytes = 9 cost units vs binary 8 bits = 8 cost units, despite $1.5 < \log_2 3 \approx 1.585$). This is a mathematical/model derivation under explicit symbol assumptions, not physical hardware or speed proof.
+- **H04-R02 Next Experiment (Four-Arm Exact Trace Ledger & Crossover Analysis):**
+  - **Objective:** Construct the full 4-arm exact trace ledger over declared integer trace families (constant small, constant large, phased sizes, alternating sizes) to compute the exact symbol, transition, and conversion crossover surface between adaptive binary (AB) and adaptive ternary (AT).
+  - **Primary Metric:** Exact symbol-slot counts and mode transition work vectors as a function of $C_3/C_2$ and conversion overhead.
+  - **Decision Boundary:** Reject ternary adaptive advantage if AT yields higher cost than AB across tested capacity domains, or if advantage vanishes under equalized mode metadata packing.
+
+### 2. Track F Candidate: Cross-Platform Deterministic AI Execution & Trace Parity (Candidate 3)
+
+- **Objective:** Determine whether T81's Deterministic Math Subsystem (RFC-0030 soft-float transcendentals) and Canonical Trace Cache (RFC-0028) can achieve **bitwise execution trace parity** across x86_64, ARM64, and WebAssembly targets under Axion policy governance, while incurring a **$<5\%$ runtime performance tax** relative to non-deterministic host `libm` floating-point execution.
+- **Target Subsystems:** `tests/determinism/` and `vm/determinism/`.
+- **Evaluation Workload:** Softmax, LayerNorm, and multi-layer MLP token generation execution traces across $100,000$ adversarial floating-point inputs.
+- **Independent Oracle:** Bitwise trace hash comparison via `CanonHash81`.
 
 ---
 
