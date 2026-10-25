@@ -7,10 +7,16 @@ Last Updated: April 2026
 
 Research and exploratory artifacts that inform roadmap work.
 
-## Scope
+## Scope & Research Track Structure
 
 This README is a navigation aid for this directory. It does not change
 specification authority, freeze boundaries, or determinism claim scope.
+
+Research inquiries in T81 are organized into three coordinated tracks governed by the [Master Continuity Charter](continuity/MASTER_CONTINUITY_CHARTER_v1.0.md):
+
+- **Track R (Scientific Computing & Alternative Representations):** Scientific ternary investigation, Base-81 digit grouping, adaptive tiering, and low-bit tensor inference (Canonical Hypotheses H01–H06).
+- **Track F (Foundation Systems & Governance Engineering):** Deterministic execution (DCP), content-addressed storage (CanonFS / RFC-00D1), pre-side-effect policy authorization (Axion), and detached evidence verification (RFC-00D4) (Canonical Hypothesis H07).
+- **Track M (AI-Assisted Research Methodology):** Auditable prompt-to-code provenance, error rate tracking, and trustworthy research iteration (Canonical Hypothesis H08).
 
 ## Key Research Consolidations & Decisions
 

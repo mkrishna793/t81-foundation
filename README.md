@@ -20,18 +20,21 @@ T81 investigates one central scientific question:
 
 > **Can alternative representations, deterministic runtime execution, or explicit policy governance produce measurable or theoretically defensible advantages over standard binary pipelines?**
 
-### Core Research Hypotheses Under Test
+### Master Canonical Hypothesis Register (H01–H08)
 
-- **Track R (Scientific Computing & Alternative Representations):**
-  - *H01 (Ternary Software Arithmetic):* Does Base-81 software tryte grouping reduce addition latency on binary ALUs? *(Falsified)*
-  - *H02 (SWAR Vectorization):* Do SWAR ternary SIMD operations improve compute density over binary SIMD? *(Falsified)*
-  - *H03 (Packed Ternary MatVec):* Does on-the-fly 2-bit ternary weight decoding execute faster than INT8 AVX2/NEON SIMD? *(Falsified for speed; validated for storage reduction)*
-- **Track F (Foundation Systems & Governance):**
-  - *H04 (Custom VM Necessity):* Is a bespoke virtual machine required for pre-side-effect policy enforcement and accountable evidence? *(Revised; protocol evidence is runtime-agnostic)*
-  - *H05 (Inner-Dispatch Governance):* Does pre-dispatch policy evaluation (`eval_axion_call`) reliably prevent unauthorized side effects? *(Established)*
-  - *H06 (Detached Evidence Protocol):* Can cryptographic evidence bundles (RFC-00D4) be verified offline without the producer VM? *(Established)*
-  - *H07 (Cross-Platform Determinism):* Do soft-float transcendentals (RFC-0030) guarantee bit-exact parity across x86_64, ARM64, and WebAssembly? *(Established)*
-  - *H08 (Artifact Identity & Provenance):* Does content-addressed storage (CanonFS / RFC-00D1) deliver immutable byte identity across systems? *(Established)*
+The project evaluates eight canonical hypotheses under its Master Continuity Charter (`docs/research/continuity/MASTER_CONTINUITY_CHARTER_v1.0.md`):
+
+- **Track R — Scientific Computing & Alternative Representations:**
+  - *H01 (Native Ternary Cost & Density):* Can native ternary storage or logic reduce normalized cost at equal information capacity vs binary? *(Density established; software CPU arithmetic falsified/frozen)*
+  - *H02 (Balanced Ternary Arithmetic):* Does balanced ternary improve signed arithmetic or rounding properties? *(Algebraic symmetry established; software SWAR SIMD falsified/frozen for speed)*
+  - *H03 (Base-81 Digit Grouping):* Does Base-81 4-trit digit grouping yield system-level interface or storage advantages? *(Validated for 2-bit weight storage; CPU MatVec speed limited by decode tax in cache)*
+  - *H04 (Adaptive Representation Tiering):* Does adaptive T81/T243/T729 capacity tiering achieve lower cost than fixed representation? *(Refined by H04-R01 exact trace model; conditional support with explicit counterexamples)*
+  - *H05 (Three-State Algebra Primitives):* Do three-state algebra primitives reduce circuit or system cost vs Boolean logic? *(Exploratory; in-VM policy coupling established for T81VM)*
+  - *H06 (Ternary AI Inference):* Do ternary weights/activations improve accuracy-constrained inference vs low-bit binary? *(Plausible for storage/bandwidth; CPU speedup disproven on binary SIMD)*
+- **Track F — Foundation Systems & Governance Engineering:**
+  - *H07 (Governed Execution & Auditability):* Does representation-independent governed execution improve auditability, policy enforcement, and trace replay? *(Established for DCP determinism, CanonFS byte identity, and detached evidence protocols)*
+- **Track M — AI-Assisted Research Methodology:**
+  - *H08 (AI-Assisted Research Iteration):* Does AI-assisted research iteration improve trustworthiness and discovery under auditable provenance? *(Established for prompt-to-code provenance and session continuity)*
 
 ---
 
@@ -55,20 +58,20 @@ The repository contains concrete, functional C++23 software components validated
 
 All experimental conclusions in T81 are grounded in reproducible benchmarks and documented research closure reports:
 
-### 1. Ternary CPU Arithmetic & Radix Comparison (H01)
+### 1. Ternary CPU Arithmetic & Radix Comparison (Track R: H01, H03)
 - **Finding:** Grouping 4 balanced trits into Base-81 trytes (`std::array` stack allocation) reduced software tryte addition latency from $105.3\text{ ns}$ down to $11.7\text{ ns}$.
 - **Baseline Comparison:** Native 64-bit binary ALU integer addition executes in $1.1\text{ ns}$ ($10.6\times$ faster).
-- **Status:** **FALSIFIED / FROZEN** (`docs/research/TERNARY_ARITHMETIC_AND_RADIX_COMPARISON.md`).
+- **Status:** Software CPU ternary addition is **FALSIFIED for speed / FROZEN** on binary ALUs (`docs/research/TERNARY_ARITHMETIC_AND_RADIX_COMPARISON.md`).
 
-### 2. Packed 2-Bit Ternary MatVec Inference (H03)
-- **Finding:** VPSHUFB nibble-parallel lookup table decoding (`matvec_ternary_2bit_avx2`) achieves $12.91\text{ GFLOP/s}$ on $4096^2$ matrices, saving $75\%$ memory footprint versus FP32.
+### 2. Packed 2-Bit Ternary MatVec Inference (Track R: H02, H03, H06)
+- **Finding:** VPSHUFB nibble-parallel lookup table decoding (`matvec_ternary_2bit_avx2`) achieves $12.91\text{ GFLOP/s}$ on $4096^2$ matrices, saving $75\%$ memory footprint versus FP32 ($0.25$ bytes/weight).
 - **Baseline Comparison:** INT8 AVX2 SIMD dot products achieve $17.15\text{ GFLOP/s}$ ($1.33\times$ faster). The SIMD bit-shuffle decode instruction tax offsets memory bandwidth savings in cache.
-- **Status:** **FALSIFIED for execution speed; REVISED for storage efficiency** (`docs/research/PACKED_TERNARY_MATVEC_PERFORMANCE_REPORT.md`).
+- **Status:** **VALIDATED for storage footprint; FALSIFIED for CPU MatVec speed in L1/L2 cache** (`docs/research/PACKED_TERNARY_MATVEC_PERFORMANCE_REPORT.md`).
 
-### 3. Accountable Computation Baseline Experiment (H04 / H05 / H06)
-- **Finding:** Pre-dispatch policy evaluation in T81VM (`eval_axion_call`) achieves $0.0\%$ unauthorized side-effect breach rates under mid-flight policy revocation.
+### 3. Accountable Computation Baseline Experiment (Track F: H07)
+- **Finding:** Pre-dispatch policy evaluation in T81VM (`eval_axion_call`) achieves $0.0\%$ unauthorized side-effect breach rates under mid-flight policy revocation under test conditions.
 - **Baseline Comparison:** A conventional Wasmtime + Open Policy Agent (OPA) host FFI capability baseline (Project Baseline-X) achieved identical $0.0\%$ breach rates and $100\%$ detached evidence auditability with $10\times$ lower host C++ code complexity.
-- **Status:** **REVISED** — Accountable computation is a protocol, not a custom VM (`docs/research/consolidation/README.md`).
+- **Status:** **ESTABLISHED for protocol evidence** — Accountable computation is a runtime-agnostic protocol (RFC-00D4), not a custom VM requirement (`docs/research/consolidation/README.md`).
 
 ---
 
