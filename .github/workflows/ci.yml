@@ -57,10 +57,34 @@ jobs:
             --exclude "https://medium.com/*"
             --exclude "https://t81dev.medium.com/*"
             --exclude "https://www.reddit.com/*"
+            --exclude '^https://deepwiki[.]com/(badge[.]svg|t81dev/t81-foundation)$'
             .github/**/*.md spec/**/*.md docs/**/*.md README.md CONTRIBUTING.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         id: lychee
+
+      # These exact URLs return persistent Vercel bot-challenge HTTP 429s.
+      # Check them separately: retry first, warn on 429 (availability unverified),
+      # and fail on every other unsuccessful response. No other links are exempt.
+      - name: Check DeepWiki links with bounded retries
+        shell: bash
+        run: |
+          failed=0
+          for url in https://deepwiki.com/badge.svg https://deepwiki.com/t81dev/t81-foundation; do
+            if ! status=$(curl --silent --show-error --location --max-redirs 5 \
+              --retry 2 --retry-delay 10 --retry-max-time 45 --max-time 15 \
+              --output /dev/null --write-out '%{http_code}' "$url"); then
+              echo "::error::DeepWiki request failed: $url"
+              failed=1
+              continue
+            fi
+            case "$status" in
+              2??) echo "DeepWiki link verified: $url (HTTP $status)" ;;
+              429) echo "::warning::DeepWiki availability unverified after retries: $url (HTTP 429)" ;;
+              *) echo "::error::DeepWiki link failed: $url (HTTP $status)"; failed=1 ;;
+            esac
+          done
+          exit "$failed"
 
       - name: Verify repository structure
         run: |
