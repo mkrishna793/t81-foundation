@@ -183,7 +183,7 @@ CanonFS retrieval expectations:
 Current convergence point:
 
 - the current typed artifact helper surface converges in
-  [main.cpp](../../tools/cli/main.cpp)
+  [main.cpp](../../tools/cli/core/main.cpp)
 - changes to helper behavior, help text, or supported schema names must remain aligned with:
   - `tests/cpp/cli_contract_test.cpp`
   - `tests/cpp/ai_task_assess_fixed_composition_test.cpp`

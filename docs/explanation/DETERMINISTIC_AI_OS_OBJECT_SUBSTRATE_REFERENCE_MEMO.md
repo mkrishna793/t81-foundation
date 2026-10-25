@@ -54,7 +54,7 @@ Implemented and build-against surfaces include:
 - the shared AI task runner in
   [ai_cli_shared.cpp](../../tools/cli/ai/ai_cli_shared.cpp)
 - the typed artifact helper surface in
-  [main.cpp](../../tools/cli/main.cpp)
+  [main.cpp](../../tools/cli/core/main.cpp)
 - the bounded chain catalog in
   [AI_OS_OBJECT_CHAIN_CATALOG.md](../reference/AI_OS_OBJECT_CHAIN_CATALOG.md)
 - the runnable examples in
@@ -147,7 +147,7 @@ Stable enough to build against:
   contract in
   [AI_TASK_SHARED_FRAMEWORK_CONTRACT.md](../reference/AI_TASK_SHARED_FRAMEWORK_CONTRACT.md)
 - the typed downstream record and bundle helpers in
-  [main.cpp](../../tools/cli/main.cpp)
+  [main.cpp](../../tools/cli/core/main.cpp)
 - the current compositions and their schema families in
   [AI_OS_OBJECT_CHAIN_CATALOG.md](../reference/AI_OS_OBJECT_CHAIN_CATALOG.md)
 - the contract and CI guardrails in

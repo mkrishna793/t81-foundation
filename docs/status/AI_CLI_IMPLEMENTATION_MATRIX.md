@@ -1,7 +1,7 @@
 # AI CLI Implementation Matrix
 
 Last Updated: 2026-03-29
-Authority: `tools/cli/ai/ai_cli_shared.cpp`, `tools/cli/main.cpp`, related tests and examples
+Authority: `tools/cli/ai/ai_cli_shared.cpp`, `tools/cli/core/main.cpp`, related tests and examples
 
 This document answers one narrow question:
 
@@ -208,7 +208,7 @@ Readiness example coverage today:
 Primary implementation surface:
 
 - [ai_cli_shared.cpp](../../tools/cli/ai/ai_cli_shared.cpp)
-- [main.cpp](../../tools/cli/main.cpp)
+- [main.cpp](../../tools/cli/core/main.cpp)
 
 Key observations from the current implementation:
 
