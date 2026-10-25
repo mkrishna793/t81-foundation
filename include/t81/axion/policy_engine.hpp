@@ -1,7 +1,7 @@
 #pragma once
 
-#include <optional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -25,8 +25,8 @@ public:
   // Borrowed policy for truthful host authorization context; owned by this engine.
   const Policy* active_policy() const noexcept { return policy_ ? &*policy_ : nullptr; }
   static std::optional<PolicyViolation> validate_policy(const std::string& policy_text);
-  static std::optional<PolicyViolation> validate_tensor_hash(const std::string& model_hash, 
-                                                         const std::string& policy_text);
+  static std::optional<PolicyViolation> validate_tensor_hash(const std::string& model_hash,
+                                                             const std::string& policy_text);
   static std::string generate_policy_report(const PolicyViolation& violation);
 
 private:

@@ -5,8 +5,8 @@
 #include "t81/axion/policy.hpp"
 #include "t81/axion/policy_engine.hpp"
 #include "t81/canonfs/canon_driver.hpp"
-#include "t81/tracing/canonhash.hpp"
 #include "t81/support/json_string.hpp"
+#include "t81/tracing/canonhash.hpp"
 
 namespace t81::direct_api {
 
@@ -126,7 +126,8 @@ AssessResult T81DirectAPI::assess_fixed_impl(const std::string& input) {
 
   try {
     if (!ai_backend_) {
-      result.error_message = "ERR_AI_NOT_INITIALIZED: Direct API requires successful initialization";
+      result.error_message =
+          "ERR_AI_NOT_INITIALIZED: Direct API requires successful initialization";
       return result;
     }
     // Create inference request
