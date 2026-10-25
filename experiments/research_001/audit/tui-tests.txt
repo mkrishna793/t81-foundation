@@ -1,0 +1,14 @@
+T81 TUI snapshot tests
+  [PASS] session roundtrip
+  [PASS] session edge cases
+  [PASS] session parser adversarial cases
+  [PASS] session load atomicity on parse error
+  [PASS] workspace state roundtrip
+  [PASS] target recency ordering
+  [PASS] command palette (31 entries)
+  [PASS] DOM snapshot
+  [PASS] trit bar widths
+  [PASS] palette filter and windowing
+  [PASS] palette stale-selection clamp
+  [PASS] tui helpers
+All TUI snapshot tests passed.
