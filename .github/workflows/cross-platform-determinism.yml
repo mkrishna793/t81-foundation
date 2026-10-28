@@ -41,6 +41,9 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - name: Checkout repository
@@ -163,6 +166,9 @@ jobs:
     needs: build-and-hash
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - name: Download Linux evidence
