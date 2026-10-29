@@ -110,3 +110,15 @@ If repository files contain conflicting statements:
 - `ACTIVE_RESEARCH_HANDOFF.md` is updated at the conclusion of every research session using the append-only session handoff template.
 - `START_HERE.md`, `RESEARCH_IDENTITY.md`, `SYSTEM_ARCHITECTURE.md`, `EVIDENCE_AND_FINDINGS.md`, and `DECISIONS_AND_GOVERNANCE.md` are modified only when a new empirical finding, accepted RFC, or governance decision supersedes previous state.
 - Never erase historical evidence or negative experimental results when updating documents.
+
+
+---
+
+## 10. Latest Operational Addenda (2026-10-29)
+
+For any new ChatGPT, Codex or Jules session, **read the latest dated sections before relying on earlier PR tables or next-action instructions**:
+
+1. [ACTIVE_RESEARCH_HANDOFF.md — Section 8](ACTIVE_RESEARCH_HANDOFF.md#8-operational-update--2026-10-29-pr-reconciliation-and-governance-validation) records the current CMP3 cleanup, #637 file-identity audit, governance validation blockers and next authorized action.
+2. [DECISIONS_AND_GOVERNANCE.md — Section 7](DECISIONS_AND_GOVERNANCE.md#7-dated-governance-and-pr-disposition-addendum--2026-10-29) records checked PR dispositions and explicit maintainer decision boundaries.
+
+These are **non-normative operational overlays**, not amendments to the H01–H08 register, RFC acceptance records, or archived experimental results. The snapshot SHA in this document's header is historical; refresh the current `main` SHA, relevant PR heads and hosted check results before acting. Do not use stale PR status statements from earlier sections as current truth.
