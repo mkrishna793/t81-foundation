@@ -125,3 +125,33 @@ CORRECTIONS: RFC-00D2 and RFC-00D4 draft; source-observed behavior does not over
 NEXT SINGLE ACTION: Read-only H04/CMP3 evidence and protocol reconciliation, then obtain maintainer decision.
 NO-AUTHORITY ACTIONS: No experimental measurement, security/policy activation, RFC acceptance or merge.
 ```
+
+
+---
+
+## 8. Operational update — 2026-10-29, PR reconciliation and governance validation
+
+**Authority:** Non-normative, append-only operational correction. This section supersedes *current-status descriptions* in Sections 1 and 4 where they conflict, but does not erase historical entries, change canonical H01–H08, accept RFCs, or authorize experiments. GitHub PR states were rechecked on 2026-10-29; recheck before acting.
+
+### CMP3 reconciliation
+
+- **Closed without merge:** [#632](https://github.com/t81dev/t81-foundation/pull/632) (same single-file Git blob as #633), [#635](https://github.com/t81dev/t81-foundation/pull/635) (sole document preserved byte-identically at `experiments/cmp3_decision_advantage/protocol/ORIGINAL_PR635_PROTOCOL.md` on `main`), [#636](https://github.com/t81dev/t81-foundation/pull/636) (obsolete, unexecuted prototype), and [#637](https://github.com/t81dev/t81-foundation/pull/637) (integrated/superseded implementation). Closure comments retain rationale and source identities.
+- **#637 full changed-path identity comparison:** 83 paths inspected against `main`: 80 identical Git blobs; three differing paths: `experiments/cmp3_decision_advantage/benchmark.cpp`, `experiments/cmp3_decision_advantage/inspect_assembly.py`, and `experiments/cmp3_decision_advantage/evidence-r1-publication/provisional/PROVISIONAL.patch`. All 83 paths exist on `main`. The three differences require preserving newer integrated corrections rather than merging the old PR head. Git blob identity is not scientific validation.
+- **Still open:** #633 and #634 retain distinct historical protocol revisions; do not close as duplicates without content-level preservation evidence.
+- **Integrated corrective lineage:** #642, #643 and #644 are merged. CMP3/r1 **measurement remains unauthorized**; the historical trusted-runner and PMU restrictions must be checked in the authoritative protocol and evidence before any execution. Do not claim a ternary advantage.
+
+### Governance stack and acceptance
+
+- **Open dependency chain:** #574 → #575 → #576 → #577; #578 → #579 → #580 is a separate investigation/preparation chain stacked above #577. #617 is a read-only acceptance report based on #577; #622 is a separate V01 regression PR, currently nonmergeable at review. None is authorized for merge or policy activation by this handoff.
+- **#574:** retained reproduction reports 24/24 agreement for Bash `pipefail` propagation, exposing 13 masked validator failures; its hosted T81 Foundation CI failed even though CodeQL and several other workflows passed.
+- **#577 / #617:** author-generated receipts report **18/27 pass, 9/27 fail**; these are *not* independent re-execution. Seven primary unresolved areas are root-layout authority, translations, docs layout, public API lock, spec/code mappings, README component-status rows and RFC lifecycle metadata. Aggregate docs-governance and a second translation check account for the other failures. The only head-associated hosted workflow found for #577 was QEMU x86 success; this is not a complete quality-gate or CodeQL acceptance.
+- **#580:** typed root contract, draft RFC-0057 and validator prototype remain inactive. Do not auto-approve root entries, update API locks, change RFC statuses, weaken validators, or modify branch protection to force green CI.
+- **#614:** dedicated skill-policy boundary workflow reported failure; Ubuntu fake-backend job passed while macOS job was cancelled. Neither a cross-platform pass nor a Linux assertion failure may be inferred. Review comment was posted.
+
+### Next single authorized action and stop condition
+
+**Next action:** Independently validate the exact #577 cumulative head `b6a20706b3b37eebbfb5ab0293a88306a3dae29a` against a freshly pinned `main`, using the *original 27-command inventory* and complete regression suites. Capture each command, exit code, stdout/stderr, environment, Git SHA and auditor attribution; obtain complete trusted hosted Linux CI and CodeQL results. Report deviations from the 18/9 historical receipt. Keep failures and skipped checks visible.
+
+**STOP / HUMAN DECISION:** Any proposed fix that redefines root authority, changes public API lock, edits accepted RFC or RFC status, relaxes required checks, rewrites historical evidence, or grants performance/measurement authority requires separate explicit maintainer approval. No new PR, CI automation, merge, measurement, or branch-protection change is authorized by this documentation update.
+
+**Evidence tier:** PR status, changed-file lists and Git blob comparisons were inspected through the GitHub connector (Tier B for source identity). Reported validation outcomes and historical tests are Tier C until independently executed on pinned source. This update performed no build, benchmark, PMU run or 27-command validation.

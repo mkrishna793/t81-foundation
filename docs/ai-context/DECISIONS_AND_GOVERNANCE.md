@@ -92,3 +92,28 @@ To amend or supersede a formally accepted architectural decision without erasing
 1. **Never Delete:** Do not erase or overwrite the original decision entry in `DECISIONS_AND_GOVERNANCE.md`.
 2. **Mark Superseded:** Change the status of the former decision to `SUPERSEDED BY AD-XXX` or `REVISED`.
 3. **Create New Entry:** Record the new decision with a distinct ID, citing the empirical evidence, benchmark result, or accepted RFC that justified the change.
+
+
+---
+
+## 7. Dated governance and PR disposition addendum — 2026-10-29
+
+**Scope:** This is a non-normative status correction, **not** a new accepted decision, governance activation, or authorization to merge. Historical PR-lineage statements above remain as dated source claims; this section is the more recent checked operational status.
+
+| Subject | Rechecked disposition | Evidentiary limit |
+| :--- | :--- | :--- |
+| CMP3 #632 | Closed unmerged as exact document duplicate of #633 | File-level identity only; #633 remains open. |
+| CMP3 #635 | Closed unmerged; original protocol preserved byte-identically on `main` | Preservation does not confer protocol approval. |
+| CMP3 #636 | Closed unmerged as obsolete unexecuted prototype | No benchmark performance inferred. |
+| CMP3 #637 | Closed unmerged as integrated/superseded | 80 of 83 changed paths match `main` by Git blob; three paths have different newer versions. |
+| CMP3 #633, #634 | Open, distinct historical protocol versions | Do not assume their exact contents are preserved elsewhere. |
+| CMP3 #642–#644 | Merged corrective lineage | Integration does not grant PMU/trusted-runner measurement authorization. |
+| Governance #574–#577 | Open stacked correction sequence | #574 hosted Foundation CI failed; #577 complete required-gate success not established. |
+| Governance #578–#580 | Open investigation/preparation stack | #580 typed contract and RFC-0057 remain draft/inactive. |
+| Governance #617 | Open read-only acceptance audit | Author receipts: 18/27 pass, 9/27 fail; NOT ACCEPTED. |
+| Governance #622 | Open V01 regression proposal | Nonmergeable at review; no automatic rebase or root allowlist widening. |
+| Skill-policy #614 | Open draft | Ubuntu argument-boundary job passed; macOS job cancelled; workflow conclusion failure. |
+
+**Maintainer decision boundary:** The nine reported governance failures include unresolved authority questions (root layout, API lock and RFC status). No AI agent may resolve them by silently changing expected outputs, weakening validators, changing protected branch rules, or treating a draft as accepted. A new independently executed 27-command inventory on the exact #577 cumulative head, plus full hosted CI and CodeQL evidence, is the next verification gate. The source of the historical 18/9 count is [#617](https://github.com/t81dev/t81-foundation/pull/617), not an independent rerun in this addendum.
+
+**Operational change discipline:** For administrative PR cleanup, close only after verified content-level supersession and a reasoned public comment; closure is not a merge or scientific acceptance. No unattended GitHub Actions triage automation is authorized. Preserve append-only history, raw negative evidence, and exact approval boundaries.
