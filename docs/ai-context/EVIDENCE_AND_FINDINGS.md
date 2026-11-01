@@ -136,3 +136,37 @@ To separate genuine radix or representation effects from conventional software e
 
 1. **H04-R02 independent verification:** The [four-arm packet](../../experiments/h04_r02_adaptive_representation/HANDOFF.md) already reports completion and a conditional negative result on binary-encoded trits. Inspect its oracle, traces, units and source provenance before considering reproduction or a distinct follow-up. **Do not reconstruct the completed experiment as new work.**
 2. **Track F Determinism Tax Measurement:** Measuring the exact execution overhead of bit-exact soft-float transcendentals ([RFC-0030](../../spec/rfcs/RFC-0030-deterministic-math-subsystem.md)) versus native host `libm` across x86_64, ARM64, and WebAssembly targets.
+
+---
+
+## 6. Evidence interpretation correction — 2026-10-31
+
+This is a **non-normative correction to the interpretation of earlier Tier A and H04-R02 summaries**, not a new experimental run. This update inspected repository text but did **not** independently replay the experiments; older table labels indicate the originating packet's historical report, not validation by this update.
+
+**H04-R02:** Consult [CORRECTED_RESULTS.md](../../experiments/h04_r02_adaptive_representation/CORRECTED_RESULTS.md) and its independent oracle/audit before drawing a scientific conclusion. The reported conditional abstract-cost result for `boundary_oscillation`, with 10-bit Tier-0 control at `r=1.60`, is **AT=1210 versus AB=1250**, so AT is lower in that specific modeled case; the reported crossover is `5/3`. The 6-trit codec and 10-bit binary capacity are not equal native-capacity controls. The original methodological inference received **Classification D** due to metadata-scaling, arithmetic and comparator issues. Neither a universal negative nor generalized ternary/hardware advantage follows. Earlier descriptions of a *conditional negative outcome* remain dated source characterizations and must not suppress this corrected conditional counterexample.
+
+**Archaeology provenance:** [#653](https://github.com/t81dev/t81-foundation/pull/653) remains under review. A file in `experiments/`, `tests/` or any other path is **not** Tier A by location, test-name, or successful historical prose. Verified execution requires source/commit identity, command and configuration, toolchain/environment, input identity, captured outputs/exit status, bounded scope and independent-replay status. If one of these is absent, mark the receipt missing and classify conservatively. As checked on #653 head `2229abf23b5f8618eca7a532e71966b32e79eb98`, `CLM-003` still repeats the unsupported universal-negative wording, so #653's scientific summary is **not accepted**. Its classifier and generated count repair still require fresh independent validation.
+
+**ADM-2 engineering:** Codex reported local Candidate A `0c22ac3` and Candidate B `826887b` as macOS ARM64 focused-tested, not published or merged. The complete experimental inference engine compiled as a translation unit in C++20 and C++23, but model request delivery failed due to inherited worker lifecycle/queue path defects. Compiler success, isolated header checks, queue sanitizer results and source-compatible `SnapshotRef` are **not** production inference, distributed determinism, a full ABI audit or Linux/Windows validation. See the local Codex-authored `ADM2_BASELINE_RECOVERY.md` when available; its results are author-reported and not independently rerun in this continuity edit.
+
+---
+
+## 2026-10-31 evidence addendum — local candidate status
+
+An operator reported ADM-2 local branch validation: `repair/adm2-baseline` (two selected CTests), `repair/adm2-m1` (five selected CTests), and engine translation-unit compilation on macOS ARM64. Neither local branch was pushed or merged in that report. **Evidence classification: unverified operator report**, not independent reproduction, complete CI, or performance measurement. No earlier negative result, H01 physical blocker, H04-R02 conditional outcome, or CMP3 evidence disposition is superseded.
+
+---
+
+## 2026-10-31 synthesis update: accepted correctness versus unresolved advantage
+
+### H04-R03 Phase B (commit-scoped acceptance)
+
+[PR #658](https://github.com/t81dev/t81-foundation/pull/658) contains an independently accepted **deterministic-correctness** implementation at exact SHA `983e258ed4b57b4cd6e010f036c1eb8656856e88` (acceptance [record](https://github.com/t81dev/t81-foundation/pull/658#issuecomment-6552493684)). Reported acceptance gates: 96 configurations / 1,896 random-access queries, 200 malformed-frame cases, 12 arm/vector witness combinations with 2,916 full-domain single-symbol checks, and 17/17 deterministic tests passing. The later PR head `0a48054510e79e753d5152ccb3f9f130c17bbafd` changed witness commentary and validation reporting, not codec logic, according to the [integration assessment](https://github.com/t81dev/t81-foundation/pull/658). **This is not throughput, PMU, native ternary silicon, compactness superiority, or Phase C authorization.** H04-R02's Classification D remains unchanged. Integration is separately blocked by broader required CI failures as reported in the integration assessment; refresh before using that status.
+
+### Comprehensive assessment boundary
+
+The provisional comprehensive assessment is a **secondary synthesis**, not a replacement for canonical experiment packets. Its defensible high-level conclusion is: substantial experimental systems engineering has been achieved, while generalized ternary advantage has **not** been demonstrated. Keep the historical Hanoi arithmetic failures, TISC/Wasm artifact ratio, H01 physical-characterization blocker, H06 scoped hardware comparisons, H07 conventional comparator gap, and H08 matched-methodology-study gap visible.
+
+### PR #660 baseline-assessment evidence warning
+
+[PR #660](https://github.com/t81dev/t81-foundation/pull/660), head observed `114a5ef82960366d2326dc8d404ef4fcbe3da4ff`, is **open and not independently accepted** as of this dated observation. Codex reviewed preceding head `aa8fe207ceacfc08dd0364cd48c6bd8a612d44a7` and flagged benchmark family attribution, oracle-versus-independent-reproduction tiering, RFC implementation overclaims, invalid source/test paths, inconsistent counts, and incomplete extraction reproducibility. A [bounded correction directive](https://github.com/t81dev/t81-foundation/pull/660#issuecomment-6552761518) requests reconciliation. Do not promote provisional counts (including six claimed Tier 4 families or implementation maturity totals) into established facts without a final-SHA independent audit. **CTest declarations are not passed executions; mathematical oracles are not independent workload reproduction.**
