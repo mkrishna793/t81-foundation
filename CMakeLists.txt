@@ -318,6 +318,10 @@ if(T81_BUILD_TESTS)
   add_executable(canonfs_integrity_matrix_test tests/cpp/canonfs_integrity_matrix_test.cpp)
   target_link_libraries(canonfs_integrity_matrix_test PRIVATE t81_core t81_axion)
 
+  add_executable(canonfs_storage_format_test tests/cpp/canonfs_storage_format_test.cpp)
+  target_link_libraries(canonfs_storage_format_test PRIVATE t81_core)
+  add_executable(t81_vm_metarefine_writecode_denial_test tests/cpp/vm_metarefine_writecode_denial_test.cpp)
+  target_link_libraries(t81_vm_metarefine_writecode_denial_test PRIVATE t81_vm t81_core)
   add_executable(canonfs_identity_contract_test tests/cpp/canonfs_identity_contract_test.cpp)
   target_link_libraries(canonfs_identity_contract_test PRIVATE t81_core t81_axion)
 
@@ -1362,6 +1366,27 @@ target_link_libraries(axion_policy_segment_event_test PRIVATE t81_isa t81_vm)
   target_link_libraries(direct_api_authorization_test PRIVATE t81_direct_api)
   add_test(NAME direct_api_authorization_test COMMAND direct_api_authorization_test)
   find_package(Python3 COMPONENTS Interpreter REQUIRED)
+  if(MSVC)
+    add_test(NAME t81_msvc_debug_configuration
+      COMMAND ${Python3_EXECUTABLE}
+        ${PROJECT_SOURCE_DIR}/tests/python/check_msvc_debug_configuration.py
+        --source ${PROJECT_SOURCE_DIR} --cmake ${CMAKE_COMMAND}
+        --compiler ${CMAKE_CXX_COMPILER} --generator ${CMAKE_GENERATOR})
+    set_tests_properties(t81_msvc_debug_configuration PROPERTIES TIMEOUT 120)
+  endif()
+  # Exercise real failure paths with NDEBUG defined, including in Debug builds.
+  foreach(guard sha3 float map)
+    string(TOUPPER "${guard}" guard_kind)
+    add_executable(t81_release_${guard}_guard tests/cpp/release_correctness_guard.cpp)
+    target_compile_definitions(t81_release_${guard}_guard PRIVATE
+      NDEBUG T81_RELEASE_GUARD_${guard_kind})
+    target_link_libraries(t81_release_${guard}_guard PRIVATE t81_core)
+    add_test(NAME t81_release_${guard}_guard
+      COMMAND ${Python3_EXECUTABLE}
+        ${PROJECT_SOURCE_DIR}/tests/python/check_release_correctness_guard.py
+        ${guard} $<TARGET_FILE:t81_release_${guard}_guard>)
+    set_tests_properties(t81_release_${guard}_guard PROPERTIES TIMEOUT 30)
+  endforeach()
   add_test(NAME controlled_ai_evidence_json_test
     COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/python/test_controlled_ai_evidence_json.py
       $<TARGET_FILE:controlled_ai_authorization_test>)
@@ -1432,6 +1457,8 @@ target_link_libraries(axion_policy_segment_event_test PRIVATE t81_isa t81_vm)
     canonfs_persistent_driver_test
     canonfs_policy_boundary_test
     canonfs_identity_contract_test
+    canonfs_storage_format_test
+    t81_vm_metarefine_writecode_denial_test
     canonfs_read_verify_test
     canonfs_read_verify_env_contract_test
     canonfs_integrity_matrix_test
