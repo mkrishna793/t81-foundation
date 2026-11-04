@@ -94,8 +94,15 @@ def verify(envelope, x, divisor, profile, store=None):
     if store is not None:
         root = Path(store)
         files = {p.relative_to(root).as_posix(): p.read_bytes() for p in root.rglob("*") if p.is_file()}
-        # Persistent driver stores raw payloads, with base81 filenames.
-        expected_files = {"objects/" + r["reference"] + ".blk": r["output"].encode()} if r["reference"] else {}
+        # Portable persistent driver initializes storage only on successful execution (result is true).
+        # In that case, it records the storage format marker and stores payloads under objects/h1-<digest>.blk.
+        # When execution halts with a fault (trap != "None"), persistent driver is not initialized so store remains empty.
+        if trap != "None":
+            expected_files = {}
+        else:
+            expected_files = {".canonfs-format": b"t81-canonfs-hex-v1\n"}
+            if r["reference"]:
+                expected_files["objects/h1-" + r["output_hash"] + ".blk"] = r["output"].encode()
         if files != expected_files:
             raise ValueError("actual storage differs from verified side effects")
     return r
