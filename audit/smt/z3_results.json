@@ -1,0 +1,72 @@
+[
+  {
+    "check": "tryte.decode.legal_trits",
+    "verdict": "PROVED",
+    "detail": "for all 27 tryte indices the decoder emits trits in {-1,0,1}"
+  },
+  {
+    "check": "tryte.roundtrip",
+    "verdict": "PROVED",
+    "detail": "for all v in [0,26]: d0 + 3*d1 + 9*d2 == v - 13"
+  },
+  {
+    "check": "tryte.encode.not_injective",
+    "verdict": "CONFIRMED",
+    "detail": "2+3*0+9*0 == -1+3*1+9*0  -> digit 2 is indistinguishable from (-1,+1)"
+  },
+  {
+    "check": "carry.value_preserved",
+    "verdict": "PROVED",
+    "detail": "\u2200 s: s == digit + 3*carry"
+  },
+  {
+    "check": "carry.legal_exactly_on_window",
+    "verdict": "PROVED",
+    "detail": "first ill-formed output at s=5 -> digit 2; legal iff -4 <= s <= 4"
+  },
+  {
+    "check": "carry.no_violation_in_window",
+    "verdict": "PROVED",
+    "detail": "\u2200 s\u2208[-4,4]: |digit| <= 1"
+  },
+  {
+    "check": "int.add_column.value",
+    "verdict": "PROVED",
+    "detail": "\u2200 a,b,cin \u2208{-1,0,1}: a+b+cin == digit + 3*carry"
+  },
+  {
+    "check": "int.add_column.legal",
+    "verdict": "PROVED",
+    "detail": "column output always a legal trit"
+  },
+  {
+    "check": "int.add_column.carry_out_reachable",
+    "verdict": "CONFIRMED",
+    "detail": "model: [c = -1, b = -1, a = 0]"
+  },
+  {
+    "check": "int.mul.truncation_lossy",
+    "verdict": "CONFIRMED",
+    "detail": "N=10: 3^5 * 3^5 = 3^10 = 59049 but 3^10 mod 3^10 = 0; symmetric range is [-(3^10-1)/2, 29524]"
+  },
+  {
+    "check": "int.mul.needs_guard",
+    "verdict": "CONFIRMED",
+    "detail": "N=10: operating range narrower than the operand range ([{-(3**20)},3**20] vs limb max 29524) - overflow reachable; the shipped operator* performs no guard"
+  },
+  {
+    "check": "karatsuba.radical_sum_can_overflow",
+    "verdict": "CONFIRMED",
+    "detail": "x0=x1=3^26 -> x0+x1 = 5083731656658 > limb max 3812798742493: T81Limb27::operator+ drops the carry-out (returns addc().first)"
+  },
+  {
+    "check": "karatsuba.wrap_identity",
+    "verdict": "PROVED",
+    "detail": "wrapped radical becomes 2*3^26 - 3^27 = -3^26, i.e. a different value"
+  },
+  {
+    "check": "bigint.fallback_violates_invariant",
+    "verdict": "CONFIRMED",
+    "detail": "operator+ single-limb fallback sets negative_=false before normalize(); normalize()->verify_invariants() std::terminate()s on a negative magnitude. std::terminate is not an exception, so the surrounding catch is dead code."
+  }
+]
