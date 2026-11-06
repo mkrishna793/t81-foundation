@@ -1,8 +1,8 @@
 # T81 Research Continuity — EVIDENCE_AND_FINDINGS
 
 **Document ID:** `docs/ai-context/EVIDENCE_AND_FINDINGS.md`
-**Version:** 1.1.0 · **Last Reviewed:** 2026-11-04
-**Source Snapshot:** `main` at `d836f7edb9b70608ef7476e82e98a0a89084d74b` (checked 2026-11-04; refresh before use)
+**Version:** 1.0.1 · **Last Reviewed:** 2026-10-29
+**Source Snapshot:** `main` at `f8ac77159ded2c4b93f4cc83abd48f6f35655468` (checked 2026-10-29; refresh before use)
 **Status:** Non-normative index to source-reported findings; no experiments independently rerun in this correction
 
 ---
@@ -25,10 +25,7 @@ This document indexes source-reported benchmark results, mathematical models, ne
 | **Integrated System Advantage Inv 08 (H07)** | System Architecture | **Tier A** | Corrective audit established: Computational (NOT SUPPORTED), Assurance (SUPPORTED), Compositional (INCONCLUSIVE), Ternary-Specific (NOT SUPPORTED). | **BOUNDED ASSURANCE SUPPORTED**. |
 | **Accountable Computation precursor (H07)** | Governance / evidence protocol | **Tier B/C here** | Local A/B/C arms reported 0/150, 90/150 and 0/150 unauthorized result creations respectively in the negative-case set; the full Wasmtime/OPA protocol was **not run**. | **INCONCLUSIVE** for custom-VM necessity and conventional parity; draft RFC-00D4 not certified. |
 | **AI Research Methodology (H08)** | Prompt-to-code provenance | **Tier C / E** | Session histories and provenance records exist; no controlled matched productivity study is cited. | **PROCESS DOCUMENTED; comparative benefit UNTESTED**. |
-| **EXP-H04-R03 Candidate A (H04)** | Matched Space/Access Microblock | **Tier A (Correctness)** | B729-µ5 matches T243 density ($L_{\text{B729-}\mu5}(m) = L_{\text{T243}}(m)$) with bounded 6-byte access; independent witness verified; PR #679 merged, PR #680 review accepted. | **CORRECTNESS ACCEPTED; Phase C performance measurement FROZEN & UNAUTHORIZED.** |
-| **BASE-01 Reference Baseline** | Cross-Platform Performance Baseline | **Tier A (Correctness)** | 126 files integrated from PRs #687–#693 without regression; 58 pass, 5 skip, 0 fail; verified correctness and Windows portability accepted in PR #700. | **INTEGRATION ACCEPTED; B1 dynamic benchmarking BLOCKED pending physical host.** |
-| **CanonFS Storage Portability** | Filesystem Key Separation | **Tier A (Correctness)** | PR #701 merged; public Base-81 IDs preserved; disk keys use `h1-<hex>` filenames; legacy raw-name migration refused; CTests passing. | **PORTABILITY DEMONSTRATED; follow-ups PR #702, #703 active.** |
-| **T81-SIA-001 System Audit** | End-to-End System Integration | **Tier A (Audit)** | Hosted stack fully integrated across Linux/macOS/Windows; freestanding Axion OS boots on UEFI bare metal/QEMU but does not execute TISC bytecode. | **PARTIALLY DEMONSTRATED; freestanding TISC VM integration is primary P0 target.** |
+| **Cross-Profile Architecture CPA-004/005 (H07, Track F)** | Dual-Profile Bounded TISC Execution | **Tier A (committed) / Local (005)** | 351-byte canonical program (SHA-256 `b0649777...`) matches independent math oracle across all 25 boundaries in 3 hosted and 3 bare-metal QEMU boots post-`ExitBootServices`. | **PROVEN BOUNDED ARCHITECTURE**; does not establish ternary performance superiority over binary. |
 
 ---
 
@@ -189,22 +186,43 @@ The provisional comprehensive assessment is a **secondary synthesis**, not a rep
 
 ---
 
-## 2026-11-04 empirical evidence and findings update
+## 2026-11-05 CPA-001 through CPA-005 Cross-Profile Architecture Evidence
 
-### EXP-H04-R03 Candidate A (B729-µ5) Correctness Acceptance
-- **Source Head:** PR #679 merged at `d8e1376a7a77902cc26269c6e8d4991bcde117a7`; independent acceptance review PR #680 merged at `927972f854ca6389304918e7aa96316fa7b1f3c3`.
-- **Implementation & Verification:** `experiments/h04_r03_matched_codec/` implements the proposed 5-value microblock codec where $729^5 = 3^{30} < 2^{48}$ occupies exactly 6 bytes (matching T243's 5 values × 6 trits = 30 trits = 6 bytes), eliminating whole-block decode latency for small reads. Exhaustive pair coverage and independent derivation witness (`independent_witness_b729_u5.py`) passed cleanly.
-- **Protection Boundary:** The acceptance review disposition is **ACCEPT — CORRECTNESS AND PROTOCOL IMPLEMENTATION ONLY**. Phase C performance measurement is explicitly frozen (`measurement_engine.py` and `benchmark_harness.py --run-measurement` exit with error 1). Hardware enforcement feasibility audit (PR #684 at `cda9135d`) assigned `PROTOCOL FEASIBILITY UNRESOLVED — PHYSICAL EXECUTION BLOCKED`.
+### 1. Program and Oracle Artifacts
+- **Canonical Program Artifact:** A 351-byte frozen binary (`experiments/cpa004/program.raw13`) containing 27 records of 13 bytes each.
+  - SHA-256 Digest: `b0649777cfa1c9e0fa1febb8bdfb1191c5cd3deea0d313791a4a32d5f207c80b`.
+  - Hex stream: `program.hex` (SHA-256 `0053d1c83e21dd1f0e77eaaa90fdf36d89f69821d5b583bcee61347c723d43fb`).
+- **Mathematical Oracle:** Independently derived using host Python integers, rational truncation, and exact little-endian hash formulas (`check.py`, `oracle.py`). Oracle state was frozen **before** hosted or guest execution.
+- **Contract & Admitted Opcodes:** Pinned contract SHA-256 `851650fd5136fe6c8f67b924f7721f73beec54e6078b9e841261bc277170705d`. Admitted 17 instructions: Halt (1), LoadImm (2), Load (3), Store (4), Add (5), Mul (7), Div (8), Mod (9), JumpIfZero (11), Cmp (15), TNot (18), TAnd (19), TOr (20), TXor (21), JumpIfNotZero (25), Trap (28, sentinel only), JumpIfNegative (60). All 17 opcodes agree across headers and registries and reside in the `< 174` capability-frozen band.
 
-### BASE-01 Integration & Verified Correctness Boundary
-- **Source Head:** PR #694 merged at `52921bd0`, review PR #695 merged at `4f9edb9c`, verified correctness PR #700 merged at `63d87633`.
-- **Findings:** Successfully integrated 126 files spanning Phase A manifest, Lane A runner, B1 foundation, and resource accounting without modifying existing repository files or triggering benchmark workflows. Restored 8 historical evidence blobs to exact byte-for-byte identity.
-- **Dynamic Measurement Gate:** Disposition is **BLOCKED FOR DYNAMIC HOST QUALIFICATION**. Virtualized Linux test execution (58 pass, 5 skip, 0 fail) verified software interfaces only; bare-metal physical host qualification and human authorization remain mandatory before any benchmark execution.
+### 2. Dual-Profile Execution Results
+- **Hosted Execution (T81VM Profile):** Three fresh processes executed `experiments/cpa004/hosted_observer.cpp` with zero differing fields. Raw output stream uncompressed SHA-256: `e26c41cd709c87213904e5bfe11d3b6f20fc7124f2350e6714d9806f95cec30a`.
+- **Freestanding Execution (Axion OS Profile):** Three fresh QEMU AArch64 boots executed `ternaryos/hal/cpa004_evaluator.cpp` after UEFI `ExitBootServices` on `cortex-a57` with zero differing fields. Raw output stream uncompressed SHA-256: `275b59c474731a398aada903e50ab477a1bf056abff411a8b6630ab5da68946f`. Executed EFI image SHA-256: `4b03971e3207205e123e3c3a08ca1da65fd8965d3f339f3cacd092eebd765ab9`.
+- **All 25 State Boundaries Matched:**
+  - Initial state plus 24 instruction steps compared.
+  - Final State: PC=27, SP=283, global `halted=true`. Trap instructions (PCs 18, 20, 23) successfully skipped.
+  - Register verification: All 81 registers (R0–R80) matched across value payloads and type tags. Key results: R43=1, R44=-1, R45=1, R46=-1; R49=162; R50=161, R51=161; R53=-3, R54=-1.
+  - Memory verification: All 1,563 logical memory words matched (e.g., MEM[81]=161, MEM[82]=-1, MEM[83]=-3).
+  - Flags and System Registers: Flags `(Z=false, N=true, P=false)`; R75=24, R76=2110228405636142087, R77=1353750679943106816, R78=0, R79=0, R80=0.
+- **Resource Footprint & Safety:**
+  - Evaluator static machine storage: 14,816 bytes.
+  - Evaluator frame: 128 bytes. Stack headroom: > 1 KiB reserved under 32 KiB workspace.
+  - Explicit checks remained active under `NDEBUG`. Deliberate wrong expectation failed with exit 1.
 
-### CanonFS Storage Portability & Invariants
-- **Source Head:** PR #701 merged at `9bbc4453ca136251448201cf9166c2bd167e1f67`. Follow-ups PR #702 (`origin/fix/canonfs-cli-list-portable-key`) and PR #703 (`origin/fix/canonfs-portable-snapshot-paths`) active.
-- **Findings:** Successfully resolved Windows and cross-platform filesystem character restrictions (`<>:"/\|?*`). Public references remain canonical Base-81 strings (`CanonHash-81`), while physical disk keys use lowercase hex filenames prefixed with `h1-` (`storage_key_v1`). CTests verify round-trip parsing, capability persistence, and explicit rejection of legacy unmigrated files.
+### 3. Evidentiary Distinctions
+- **Committed vs Local Evidence:** CPA-004 raw evidence and evaluator are committed on branch `origin/experiment/cpa004-freestanding` (commit `b803bf916a1b1e44129f3a07abf96fa6103c51fc`) on base `803075e9f7e36ed4b5318a8d2ddaacf62ae0a7e4`. CPA-005 represents local/continuity synthesis (without unverified remote git commits). PR #709 is confirmed unmerged/not present on remote.
+- **Reproduced Experiment vs Independent-Person Replication:** The mathematical derivation and execution switch were developed by the same agent lineage (Codex); this is a reproducible, verified experiment, not an independent third-party replication.
+- **Tested Snapshot vs Current `main`:** The tests were executed against base `803075e9f7e36ed4b5318a8d2ddaacf62ae0a7e4`. Current `main` is at `ea6d031a8117341fe03013cc9d5473de1b07727d`.
+- **Architecture Working vs Ternary Advantage:** Bit-exact cross-profile execution proves the computational architecture works; it does not prove ternary superiority in performance, energy, or area over binary.
 
-### T81-SIA-001 System Integration Audit Findings
-- **Source Pin:** Published across 8 reports under `docs/reports/audit/` at baseline commit `9bbc4453ca136251448201cf9166c2bd167e1f67`.
-- **Findings:** Demonstrated that T81 operates as an integrated, spec-governed software platform on Linux, macOS, and Windows. In contrast, the freestanding Axion OS kernel (`ternaryos/`) boots on bare metal / hypervisors via UEFI but executes only raw native AArch64 machine-code stubs (`T81X`) via SVC ABI. TISC bytecode execution in the freestanding environment is absent, establishing the primary P0 integration milestone.
+---
+
+## 2026-11-05 CPA-006 bounded conformance and ISA-001 evidence boundary
+
+**CPA-006:** [PR #710](https://github.com/t81dev/t81-foundation/pull/710) merged to `experiment/cpa005-integration-base` at `514fa17cf5629a7aea9ebb1b035f01f3ef7687f3`; reviewed head `efecab7902ebf8ba1ee560d93e0fd5a6050a2d9e`, merged tree `f8f01f58901bfd9a57446a97df98bb8d481da022`. [Acceptance report](https://github.com/t81dev/t81-foundation/blob/514fa17cf5629a7aea9ebb1b035f01f3ef7687f3/experiments/cpa006/README.md). Reported **PASS — BOUNDED CONFORMANCE**: 19/19 frozen-oracle cases, 57 fresh hosted runs, 57 fresh QEMU boots, 1,190 validated state records; 7 normal Halt, 8 runtime trap, 3 admission rejection and 1 budget-exhaustion cases. Default-off isolation, sanitizers and deliberate negative controls passed. The acceptance report is evidence of the reported run, **not an independently repeated run by this documentation update**. C01's metadata references cancellation not actually exercised by its case; do not expand coverage claims. Historical staging inconclusives and negative findings remain unchanged.
+
+**ISA-001:** Codex reported a read-only source/identity audit, **READY FOR MAINTAINER DECISION**. No new execution or Commons validation was performed. Its checked source identities on main `7afa4f1a424be6c65fab28f8e5bcf4fddc3ef762` match the CPA baseline for VM, encoding, opcode header and principal TISC specification files. It reports preservation of 882 CPA-006 manifest entries and 163 CPA-005 archived entries by hash and size; these establish *content identity*, not independent scientific validity. The original CPA program SHA-256 remains `b0649777cfa1c9e0fa1febb8bdfb1191c5cd3deea0d313791a4a32d5f207c80b`.
+
+**Semantic conflicts remain open:** direct vs indirect Load/Store; immediate vs register-derived branch targets and register vs FLAGS JZ/JNZ predicates; TXor wrapped difference vs ambiguous documentary 'sum'; 174 core capability-frozen byte values vs 209 registry interpretations vs 244 named header values, including conflicting TVecSub/SWAR extension assignments. Header values occupy 0–220 and 224–246; undefined bytes 221–223 and 247–255. The CPA experiments exercise an admitted 17-opcode profile and do **not** resolve normative authority or general conformance. Optional LLVM/MLIR lowerings were source-inspected, not executed, and cannot inherit CPA parity.
+
+**Scientific classification:** Executed bounded cross-profile correctness is a positive Track F result; ternary-vs-binary advantage remains an open Track R question. No energy, physical ternary device, universal optimization, or production-OS conclusion is authorized.

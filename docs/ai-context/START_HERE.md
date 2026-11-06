@@ -1,26 +1,31 @@
 # T81 Research Continuity — START_HERE
 
-**Latest operational view (2026-11-04):** Read the November 4 entries in this document and [`ACTIVE_RESEARCH_HANDOFF.md`](ACTIVE_RESEARCH_HANDOFF.md).
-Current repository head is `d836f7edb9b70608ef7476e82e98a0a89084d74b` on `main`.
-Key operational and research milestones reconciled at this head:
-1. **Core Runtime & Hosted Platform:** Fully functional across Linux, macOS, and Windows. T81Lang compiles to frozen TISC v1.9.0 bytecode, executes deterministically in T81VM, enforces fail-closed Axion safety policies, and persists immutable content-addressed objects in CanonFS.
-2. **CanonFS Portability Integration:** PR #700 (`63d87633`, BASE-01 verified correctness & Windows test portability) and PR #701 (`9bbc4453`, portable `h1-<hex>` storage keys & Windows Debug VM denial) are merged. Active follow-ups PR #702 (`origin/fix/canonfs-cli-list-portable-key` at `41f95d4c`, canonical reference restoration & CTest suite) and PR #703 (`origin/fix/canonfs-portable-snapshot-paths` at `991f3169`, portable snapshot directories `h1-<hex>` & CLI lifecycle) are in progress.
-3. **Freestanding Axion OS Distinction:** The bare-metal UEFI kernel under `ternaryos/` boots on bare metal / hypervisors (QEMU AArch64 and x86-64) to an interactive prompt with hardware timers, PL011 UART, and virtio-blk drivers, but does **not** embed T81VM or execute TISC bytecode; it currently executes only raw native assembly stubs (`T81X`).
-4. **BASE-01 & H04-R03 Protection Boundaries:** BASE-01 integration (#694 merged at `52921bd0`, #695 review merged at `4f9edb9c`) and EXP-H04-R03 Candidate A (#679 merged at `d8e1376a`, #680 review merged at `927972f8`) are integrated in **correctness-only mode**. All performance measurements and benchmarking campaigns remain strictly frozen and unauthorized without dedicated hardware qualification and human maintainer sign-off.
-5. **New System Integration Audit (T81-SIA-001):** Published under `docs/reports/audit/` (reports A through H), establishing the exact boundary between demonstrated hosted execution and experimental freestanding microkernel capabilities.
+**Latest Cross-Profile Architecture & Identity View (2026-11-05):** T81 has demonstrated a functioning bounded computational architecture. Bounded cross-profile TISC execution is verified across hosted T81VM and freestanding Axion OS (AArch64 QEMU) against an independent mathematical oracle across all 25 observation boundaries (CPA-004/CPA-005). Incoming research agents should **not** re-verify whether the bounded cross-profile implementation works; focus on open research hypotheses, remaining ISA discrepancies, and disciplined comparative advantage benchmarks.
 
-**Latest BASE-01 integration and readiness view (2026-11-03):** Read [BASE01_2026-11-03.md](BASE01_2026-11-03.md). PRs #694 and #695 are merged; integration acceptance does not authorize B1 measurement. Older dated operational views below remain historical.
+**Latest BASE-01 integration and readiness view (2026-11-03):** Read [BASE01_2026-11-03.md](BASE01_2026-11-03.md) first. PRs #694 and #695 are merged; integration acceptance does not authorize B1 measurement. Older dated operational views below remain historical.
+
+**Latest operational view (2026-11-02):** Read the selected view in
+[`CURRENT_STATE.json`](CURRENT_STATE.json), backed by the bounded
+[PR/source receipt](receipts/2026-11-02-pr678-observations.json), before older status tables.
+Observed main is `8e44c0f667c62e0d4143bb93169fc3235d5ebd66`: #675 is merged with
+arithmetic validation accepted within its declared scope; #676 is merged historical
+backlog-audit evidence; #677 is merged H04-R03 Candidate A preregistration, with
+**Phase C still unauthorized**. #656 remains open pending integration and #678
+remains open with corrections pending acceptance. Local cleanup's audit is reported
+completed; its execution outcome is **not independently verified** by this index.
+The earlier views and snapshots below remain dated history. This update grants no
+merge, measurement, M2 execution or governance authority.
 
 **Document ID:** `docs/ai-context/START_HERE.md`
-**Version:** 1.1.0 · **Last Reviewed:** 2026-11-04
-**Source Snapshot:** `main` at `d836f7edb9b70608ef7476e82e98a0a89084d74b` (checked 2026-11-04; refresh before use)
+**Version:** 1.0.1 · **Last Reviewed:** 2026-10-29
+**Source Snapshot:** `main` at `f8ac77159ded2c4b93f4cc83abd48f6f35655468` (checked 2026-10-29; refresh before use)
 **Status:** Non-normative navigation and research handoff index; not an accepted contract or independent verification
 
 ---
 
 ## 1. T81 Identity in One Paragraph
 
-T81 Foundation is an experimental computing architecture and scientific research platform investigating alternative digital representations (balanced ternary, Base-81 tryte grouping, adaptive radix tiering) and policy-governed deterministic execution. The program combines scientific research into mathematical, algorithmic, and physical substrate advantages (Track R) with foundation systems engineering for bit-exact cross-platform determinism, content-addressed artifact identity via CanonFS, pre-side-effect policy authorization via Axion, and detached accountable evidence verification (Track F). T81 is not a commercial desktop operating system or a production CPU product; it is a hypothesis-driven empirical research instrument designed to determine under what exact assumptions, workloads, cost models, and physical substrates non-binary computational representations yield defensible advantages over optimized conventional baselines.
+T81 Foundation is an implemented experimental computing architecture and scientific research platform investigating alternative digital representations (balanced ternary, Base-81 tryte grouping, adaptive radix tiering) and policy-governed deterministic execution. T81 defines TISC (Ternary Instruction Set Computer) as its core computational instruction contract, with bounded cross-profile execution demonstrated across both a hosted virtual machine (T81VM) and a bare-metal freestanding microkernel environment (Axion OS on AArch64 QEMU). The program combines scientific research into mathematical, algorithmic, and physical substrate advantages (Track R) with foundation systems engineering for bit-exact cross-platform determinism, content-addressed artifact identity via CanonFS, pre-side-effect policy authorization via Axion, and detached accountable evidence verification (Track F). T81 is not a commercial desktop operating system or a production CPU product; it is a functioning experimental computational architecture and hypothesis-driven empirical research instrument designed to determine under what exact assumptions, workloads, cost models, and physical substrates non-binary computational representations yield defensible advantages over optimized conventional baselines.
 
 ---
 
@@ -93,6 +98,8 @@ Research agents are strictly forbidden from repeating or generating the followin
 2. **PROHIBITED:** Claiming T81 is a commercial operating system running on physical ternary microprocessors (Falsified: no physical ternary silicon exists in the repository; all execution uses binary hardware emulation).
 3. **PROHIBITED:** Claiming that a custom VM is strictly necessary **or** that Wasmtime + OPA has already demonstrated equivalent safety in the complete Baseline-X protocol. The [bounded precursor report](../../examples/governance/accountable-computation/REPORT.md) did not deploy Wasmtime/OPA; the [claim register](../../experiments/research_001/CLAIM_REGISTER.md) leaves that comparison under active test.
 4. **PROHIBITED:** Redefining, renumbering, or silently closing canonical hypotheses H01–H08.
+5. **PROHIBITED:** Treating bounded cross-profile execution correctness (CPA-004/CPA-005) as proof of ternary speed, energy, or hardware performance superiority.
+6. **PROHIBITED:** Asking incoming AI agents to re-establish whether bounded cross-profile TISC execution works. The cross-profile agreement between hosted T81VM and freestanding Axion OS across 25 observation boundaries is established evidence.
 
 ---
 
@@ -125,31 +132,7 @@ If repository files contain conflicting statements:
 
 ---
 
-## 10. Operational Status Addendum — 2026-11-04 (T81-SIA-001 Integration Audit)
-
-**Authoritative Repository Pin:** `main` at commit `d836f7edb9b70608ef7476e82e98a0a89084d74b`.
-
-The T81 program has reached an inflection point where isolated subsystem achievements must be rigorously evaluated as a unified system. Under direction of the Maintainer, an exhaustive, read-only system integration audit (**T81-SIA-001**) was conducted and published under `docs/reports/audit/` across eight companion reports:
-- `T81_SYSTEM_INTEGRATION_AUDIT.md`: Executive summary and subsystem maturity register.
-- `T81_BOOT_EXECUTION_TRACE.md`: Firmware-to-kernel boot trace on x86-64 and AArch64.
-- `T81_APPLICATION_LIFECYCLE_MATRIX.md`: Hosted vs freestanding application lifecycles and recovery.
-- `T81_SUBSYSTEM_DEPENDENCY_MAP.md`: Call graph and inter-system coupling analysis across 13 subsystems.
-- `T81_OS_CAPABILITY_MATRIX.md`: 18-point capability evaluation against conventional operating systems.
-- `T81_INTEGRATION_GAP_REGISTER.md`: Prioritized register of engineering gaps and minimum viable repairs.
-- `T81_VALIDATION_EVIDENCE.md`: Reproducible build commands, test results, logs, and empirical evidence.
-- `T81_SYSTEM_READINESS_VERDICT.md`: Formal subsystem readiness dispositions, architectural identity, and milestone roadmap.
-
-### Strongest Demonstrated Capabilities
-1. **Hosted Deterministic Toolchain:** T81Lang compiles to frozen TISC v1.9.0 bytecode, executes in T81VM with 100% deterministic repeatability, and integrates register-level policy event hooks.
-2. **Fail-Closed Policy Governance:** Axion policy engine intercepts storage mutations, model intakes, and runtime events before side effects take place.
-3. **Immutable Content-Addressed Storage:** CanonFS stores raw blocks, capability grants, and snapshot manifests using cryptographic hashes (`sha3-256`, `sha3-512`), with active cross-platform portability integration ensuring portable `h1-<hex>` storage keys on disk.
-
-### Critical Execution Boundary (Freestanding Disconnect)
-Freestanding Axion OS (`ternaryos/`) boots independently on bare metal and hypervisors (QEMU/VirtualBox) via UEFI, exits boot services, establishes MMU paging (TTBR0), PL011 UART, and virtio-blk modern drivers. However, **Axion OS does not host T81VM or execute TISC bytecode**. It currently executes only raw position-independent native AArch64 machine-code stubs (`T81X`). Bridging this gap by embedding a zero-allocation TISC runtime into Axion OS represents Milestone 1 (P0) of the system roadmap.
-
----
-
-## 11. Latest Operational Addenda (2026-10-29)
+## 10. Latest Operational Addenda (2026-10-29)
 
 For any new ChatGPT, Codex or Jules session, **read the latest dated sections before relying on earlier PR tables or next-action instructions**:
 
@@ -195,3 +178,35 @@ The `Source Snapshot` above is a historical observation, not the live repository
 **Read first for current M2:** [active handoff](ACTIVE_RESEARCH_HANDOFF.md), [decision gate #671](https://github.com/t81dev/t81-foundation/pull/671), [candidate protocol #672](https://github.com/t81dev/t81-foundation/pull/672), [Codex audit #673](https://github.com/t81dev/t81-foundation/pull/673), and [Jules review #674](https://github.com/t81dev/t81-foundation/pull/674). These PRs were observed open and unmerged on 2026-11-01; refresh before relying on status.
 
 **Disposition:** `M2_RESEARCH_QUESTION_REFINEMENT_REQUIRED — EXECUTION_BLOCKED`. Distinguish S (adaptive software representation), A (algorithm routing), and T (ternary-specific attribution). T is the long-horizon scientific objective; positive S/A findings do not establish T. Polynomial evaluation in #672 is a proposed, **unaccepted** S/A workload, not an approved benchmark. The seven P1 blockers in #673 remain open. No experimental execution, CI bypass, governance activation or merge is authorized by these notes.
+
+---
+
+## 12. Cross-Profile Architecture (CPA-001 through CPA-005) Summary — 2026-11-05
+
+**Verified repository state:** Snapshot base `803075e9f7e36ed4b5318a8d2ddaacf62ae0a7e4`; current `main` at `ea6d031a8117341fe03013cc9d5473de1b07727d`; PR #709 is an **open draft PR (unmerged)** at head `b803bf916a1b1e44129f3a07abf96fa6103c51fc` on branch `origin/experiment/cpa004-freestanding`.
+
+The Cross-Profile Architecture (CPA) program achieved a major milestone:
+1. **Implemented Bounded Cross-Profile Architecture:** T81 now has proven cross-profile execution of TISC bytecode between user-space (hosted T81VM) and bare-metal (freestanding Axion OS microkernel on AArch64 QEMU).
+2. **Deterministic Oracle Alignment:** A 351-byte canonical program (SHA-256 `b0649777...`, 17 opcodes) executes across 24 instructions and reaches identical state at all 25 observation boundaries (R0–R80, logical memory, flags, system registers R75–R80).
+3. **Execution Correctness $\neq$ Ternary Superiority:** Proving the engine works across profiles resolves the question of whether T81 is a functioning architecture. It does not establish ternary performance, density, or energy superiority over binary baselines.
+4. **Preserved Discrepancies:** Four normative discrepancies remain documented without silent resolution:
+   - Memory addressing: Direct logical addressing (runtime/semantics) vs register-indirect (`spec/tisc-spec.md`).
+   - Branch target & condition: Direct immediate target + R[B] zero-test (runtime/semantics) vs register-indirect + FLAGS-based conditional branches (`spec/tisc-spec.md`).
+   - TXor truth table: Balanced wrapped difference (`(lhs - rhs + 1) % 3 - 1`) vs ambiguous "Sum" label.
+   - Opcode inventory: 174 capability-frozen vs 209 registry entries vs 244 named C++ header opcodes vs 247 numerical interval with 221–223 undefined.
+
+---
+
+## 13. Current research gate — 2026-11-05, after CPA-006 and ISA-001
+
+**Current main:** `7afa4f1a424be6c65fab28f8e5bcf4fddc3ef762` (observed 2026-11-05). This addendum supersedes earlier *live status and next-action* text, not historical source identities or approvals. PR #711 merged the preceding CPA-001–005 continuity refresh to main; its seven changed files were README.md and the six canonical AI-context files.
+
+**Established, bounded:** CPA-006 reports 19/19 frozen-oracle cases, three hosted and three fresh AArch64 QEMU executions per case (57+57), and 1,190 validated state records. Outcomes include normal Halt, runtime traps, admission rejection, and instruction-budget exhaustion. The experiment does not establish full ISA conformance, physical ternary performance, or independent-person replication. See [CPA-006 acceptance report on its merged integration branch](https://github.com/t81dev/t81-foundation/blob/514fa17cf5629a7aea9ebb1b035f01f3ef7687f3/experiments/cpa006/README.md).
+
+**Actual integration:** PR #710 is merged into `experiment/cpa005-integration-base` (merge result `514fa17cf5629a7aea9ebb1b035f01f3ef7687f3`), **not main**. PR #709 (CPA-004 evaluator) remains open draft and PR #707 (CPA-002 matrix correction) remains open. Main describes the CPA findings but does not carry these experimental evaluator paths. Do not equate identical file content, a merged PR, and main-branch ancestry.
+
+**ISA-001 outcome:** Read-only assessment, **READY FOR MAINTAINER DECISION**; no normative decision, RFC acceptance, code change, or new execution test occurred. Proposed direction: version an authoritative TISC contract retaining normative register-indirect memory and flag-based/register-target branches; explicitly define scalar TXor as wrapped balanced difference; preserve frozen 0–173 and reconcile accepted extension assignments; pin the current implemented CPA semantics as a *historical experimental profile*. These are recommendations, **not accepted requirements**. Raw 13-byte instructions have no profile identifier; any semantic transition needs explicit artifact-bound profile selection and the formal breaking-change process.
+
+**Next authorized action:** Draft/review the precise versioned TISC transition-contract RFC and maintainer decision matrix **without changing implementation or historical CPA artifacts**. After approval, separately authorize discriminating tests and one cumulative integration candidate; then preregister an H02 signed-rounding comparison against optimized binary and encoding-cost controls. Do not restart CPA execution-feasibility research.
+
+**Evidence hierarchy:** Normative specification and governance controls decide required semantics; pinned executed artifacts decide observed historical behavior; this non-normative continuity index cannot confer acceptance, merge, or performance authority.

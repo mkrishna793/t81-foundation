@@ -1,8 +1,8 @@
 # T81 Research Continuity — RESEARCH_IDENTITY
 
 **Document ID:** `docs/ai-context/RESEARCH_IDENTITY.md`
-**Version:** 1.1.0 · **Last Reviewed:** 2026-11-04
-**Source Snapshot:** `main` at `d836f7edb9b70608ef7476e82e98a0a89084d74b` (checked 2026-11-04; refresh before use)
+**Version:** 1.0.1 · **Last Reviewed:** 2026-10-29
+**Source Snapshot:** `main` at `f8ac77159ded2c4b93f4cc83abd48f6f35655468` (checked 2026-10-29; refresh before use)
 **Status:** Non-normative research-identity navigation; canonical H01–H08 definitions remain in the JSON register
 
 ---
@@ -37,8 +37,9 @@ To overcome trit-level storage overhead, the project introduced Base-81 digit gr
 Modern T81 Foundation integrates Track R alternative representations with Track F systems substrate:
 - Bit-exact cross-platform determinism (DCP) and soft-float math ([RFC-0030](../../spec/rfcs/RFC-0030-deterministic-math-subsystem.md)).
 - Pre-side-effect policy authorization kernel (Axion).
-- Content-addressed artifact storage and foreign file system interchange (CanonFS / [RFC-00D1](../../spec/rfcs/RFC-00D1-canonfs-foreign-filesystem-interchange.md)).
-- DAIOS Target Architecture ([RFC-00D2](../../spec/rfcs/RFC-00D2-daios-target-architecture-and-sequencing.md)).
+- Content-addressed artifact storage and portable storage keys (CanonFS / [RFC-00D1](../../spec/rfcs/RFC-00D1-canonfs-foreign-filesystem-interchange.md)).
+- Dual TISC execution profiles: hosted virtual machine (`t81_vm`) and freestanding bare-metal microkernel (`ternaryos` / Axion HAL on AArch64 QEMU).
+- DAIOS Target Architecture ([RFC-00D2](../../spec/rfcs/RFC-00D2-daios-target-architecture-and-sequencing.md)), maintained as an independent forward-looking research direction.
 
 ---
 
@@ -174,11 +175,21 @@ The research program has evolved from Knuth/discrete-mathematics and Hanoi/CWEB 
 
 ---
 
-## 2026-11-04 system integration and architectural research posture
+## 2026-11-05 CPA research milestone note
 
-The publication of the **T81-SIA-001** System Integration Audit (`docs/reports/audit/`) marks a crucial maturation in T81's research identity. The program now explicitly disaggregates the source of value into three distinct mechanisms:
-1. **Ternary-Specific Mechanisms (T):** Exact sign symmetry, zero-cost negation, balanced arithmetic, Base-81 grouping, and theoretical multi-level storage. Bounded experiments have confirmed mathematical properties, but have also produced decisive negative results on conventional CPUs (software ALU tryte addition is $10.6\times$ slower; SIMD VPSHUFB decode limits MatVec speed). In silicon, ternary hardware remains unproven and blocked for simulation preparation (ADR-0007).
-2. **Software Architecture Mechanisms (S):** Deterministic execution profiles (DCP), fail-closed policy enforcement before side effects (Axion), content-addressed verifiable storage (CanonFS), and immutable snapshot manifests. These properties provide substantial engineering value, but are representation-independent and could be implemented with identical efficacy using binary data types.
-3. **End-to-End System Integration (I):** The unified integration of determinism, policy governance, and verifiable storage into a single pipeline.
+The completion of CPA-001 through CPA-005 establishes that T81 is an **implemented, working experimental computing architecture**. Bounded cross-profile execution of TISC bytecode between hosted T81VM and freestanding Axion OS (AArch64 QEMU) matches the independently derived mathematical oracle across 25 observation boundaries.
 
-**Core Research Principle:** Useful software integration does **not** demonstrate ternary computational superiority. A well-engineered, policy-governed runtime running on conventional hardware does not prove that ternary arithmetic is superior in silicon. T81's next major research question is not "Can ternary math be simulated?", but rather: **"How much of T81 functions today as one coherent, independently executable computing system, and what useful capability does the integrated platform demonstrate independently of ternary-specific performance?"**
+Crucially, **execution correctness must be distinguished from comparative computational advantage**:
+1. Proving that the TISC interpreter and freestanding evaluator produce bit-exact identical register, memory, flag, and system-register traces proves that the dual-profile architecture functions.
+2. It does **not** prove that ternary arithmetic, ternary memory, or ternary execution outperforms, uses less energy than, or is denser than conventional binary computers.
+3. Comparative ternary advantage remains an open scientific question governed by H01–H08, requiring matched, rigorous binary controls.
+
+---
+
+## 2026-11-05 post-CPA-006 scientific identity and open question
+
+CPA-006 extends the previously demonstrated bounded TISC cross-profile result from one canonical program to **19 independently frozen conformance cases** with 57 hosted executions, 57 fresh freestanding AArch64 QEMU boots and 1,190 validated state records, as reported in the [CPA-006 acceptance record](https://github.com/t81dev/t81-foundation/blob/514fa17cf5629a7aea9ebb1b035f01f3ef7687f3/experiments/cpa006/README.md). This is an engineering conformance result for the *implemented historical profile*, not evidence of universal ISA correctness or ternary advantage. It does not change canonical H01–H08 definitions or their evidence tiers.
+
+**Program identity:** T81 is the experimental computational architecture; TISC is the computational instruction contract; hosted T81VM and freestanding Axion/TernaryOS are distinct execution profiles; DAIOS remains a separate experimental direction. The freestanding CPA evaluator is not a completed general-purpose operating system or native three-state processor.
+
+**Next scientific discriminator:** Following formal ISA reconciliation, a separately authorized H02 signed-rounding study may compare balanced-ternary digit truncation/correction for division by `3^k` with optimized conventional integer division at identical exact-rounding semantics. Require an exact-integer oracle, matched value domain, an optimized binary comparator, a binary encoding of the same ternary digits as an attribution control, conversion/storage costs, fixed workload, and a preregistered falsifier. This is a proposal, not an executed experiment; earlier Hanoi arithmetic failures and negative binary-host performance findings remain intact.

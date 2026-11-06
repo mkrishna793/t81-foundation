@@ -154,22 +154,35 @@ Reported local ADM-2 candidates (`0c22ac323484e37cc85f95201bd4dc01729dedb4` and 
 
 ---
 
-## 9. Operational decisions and governance boundaries — 2026-11-04 (T81-SIA-001 Audit)
+## 9. Dated governance and CPA program disposition — 2026-11-05
 
-**Checked main:** `d836f7edb9b70608ef7476e82e98a0a89084d74b`.
+**Scope:** Non-normative operational addendum recording the status of the Cross-Profile Architecture (CPA) program, PR #709, and associated experimental branches.
 
-### 9.1 Authorization of T81-SIA-001 Integration Audit
-The Maintainer authorized **T81-SIA-001** as a strictly **read-only, non-destructive systems engineering and integration audit** to evaluate end-to-end integration across the 13 repository subsystems.
-- **Scope & Delivery:** Delivered across eight canonical reports under `docs/reports/audit/` at baseline commit `9bbc4453ca136251448201cf9166c2bd167e1f67`.
-- **Authority Boundary:** This audit deliverable does not alter runtime behavior, does not relax any CI check, does not authorize BASE-01 or H04-R03 performance measurements, and does not authorize automated merges.
+| Subject | Checked or recorded status | Governance & evidentiary boundary |
+| :--- | :--- | :--- |
+| **CPA-001** | Historical architectural & experimental assessment | Archived proposal and assessment; no implementation. |
+| **CPA-002** | Opcode conformance matrix test repair (`docs/records/audits/T81_CPA_002_OPCODE_CONFORMANCE.md`) | Head `55223cb` on branch `origin/fix/t81-cpa-002-opcode-conformance` (base `803075e9f7e36ed4b5318a8d2ddaacf62ae0a7e4`). Corrects `tisc_opcode_matrix_test.cpp` under `NDEBUG`. Retains undefined opcodes 221–223 and 247–255 without modifying opcode definitions or decoder. |
+| **CPA-003** | Oracle verification and artifact freeze (`experiments/cpa004/evidence/acceptance/CPA003-README.md`) | 351-byte canonical program (SHA-256 `b0649777...`), independent Python integer/truncation oracle, 25 observation boundaries, 17-opcode subset. |
+| **CPA-004** | Dual-profile acceptance report and raw evidence (`experiments/cpa004/README.md`) | Committed on branch `origin/experiment/cpa004-freestanding` (commit `b803bf916a1b1e44129f3a07abf96fa6103c51fc` on base `803075e9f7e36ed4b5318a8d2ddaacf62ae0a7e4`). Demonstrates bit-exact agreement between 3 hosted T81VM runs and 3 bare-metal AArch64 QEMU boots post-`ExitBootServices` at all 25 observation boundaries. Opt-in CMake flag `T81_BUILD_CPA004_EXPERIMENT=OFF` by default. |
+| **CPA-005** | Integration baseline and review tree | Pinned on branch `origin/experiment/cpa005-integration-base` (commit `f7e089590020508077607580da271b6570fa8f60`, integrated tree `70734fd5bcfe06978cea13b4d2d595d4dda71a12`) on main base `ea6d031a8117341fe03013cc9d5473de1b07727d`. Replays verified CPA004 binaries against baseline and establishes review baseline without merge commit. |
+| **PR #709** | Open draft PR (unmerged) | Head `b803bf916a1b1e44129f3a07abf96fa6103c51fc` (`experiment/cpa004-freestanding`). Base is main `ea6d031a8117341fe03013cc9d5473de1b07727d`. Unmerged draft; must not be claimed as merged. |
+| **PR #707** | Open unmerged PR | Contains CPA-002 test repairs and audit report on base `803075e9f7e36ed4b5318a8d2ddaacf62ae0a7e4`. |
 
-### 9.2 CanonFS Portability & Identity Invariants
-- **Public ID Invariant:** Public snapshot IDs and object hashes remain immutable Base-81 strings (`CanonHash-81`).
-- **Physical Key Invariant:** All filesystem-level object files and snapshot directories must use lowercase hex keys prefixed with `h1-` (`storage_key_v1` in `include/t81/canonfs/storage_key.hpp`).
-- **No Silent Legacy Migration (Fail-Closed):** Any store or snapshot containing raw Base-81 filenames must fail closed with an explicit error rather than silently migrating or rewriting directory contents in place.
-- **Windows Portability:** Filesystem path operations must strictly forbid Windows-reserved characters (`<>:"/\|?*`).
+### Maintainer Decision Boundaries
+1. **Scope Boundary Enforcement:** CPA-004 acceptance is explicitly bounded to the admitted 17-opcode profile on the 351-byte canonical program under static limits (64 steps, 81 registers, 1,563 memory words). It does not grant full ISA conformance, full OS certification, or general arbitrary-program execution.
+2. **Preservation of Normative Conflicts:** The four identified discrepancies (memory operands, branch operands, TXor difference vs sum label, opcode inventories) must remain documented in architecture records. They must not be silently resolved or normalized without explicit maintainer RFC adoption.
+3. **Research vs Activation:** Demonstrating that T81 is a working, implemented architecture with dual execution profiles provides research foundation (Track F) to support Track R. It does **not** authorize production activation or constitute proof of ternary performance advantage.
 
-### 9.3 Protected Experimental Baselines
-- **BASE-01:** Integrated in PR #694/#695 and verified in PR #700 strictly for software correctness. All dynamic benchmarking, PMU counter collection, and performance timing remain frozen pending dedicated bare-metal Linux qualification and signed maintainer permit.
-- **EXP-H04-R03 Candidate A:** Codec implementation (PR #679) and acceptance review (PR #680) are integrated for correctness and protocol compliance only. Phase C benchmarking remains frozen (`measurement_engine.py` exits with code 1).
-- **Freestanding Axion OS Promotion:** TernaryOS remains an experimental bootloader/kernel prototype. Automatic promotion to a general-purpose OS or production runtime is prohibited.
+---
+
+## 10. Pending TISC semantic authority decision — 2026-11-05
+
+**Status: PROPOSED / NOT ACCEPTED.** Codex ISA-001 finished a read-only reconciliation audit with disposition **READY FOR MAINTAINER DECISION**. The maintainer has not thereby accepted a breaking semantic change. No tracked implementation, normative specification, branch, CPA artifact, or governance rule was modified by the audit.
+
+**Decision requested:** (1) adopt a new explicitly versioned authoritative TISC profile using the existing normative specification's register-indirect Load/Store and FLAGS-based conditional branching with register-derived targets; (2) specify scalar TXor as `wrap3(lhs - rhs)`, including coercion, tag and flag rules; (3) preserve frozen core byte assignments 0–173 and reconcile extension conflicts, including TVecSub and SWAR, against accepted RFCs; (4) retain current CPA-003–006 implemented semantics as a pinned historical experimental profile, without silently changing the meaning of identical raw 13-byte binaries. These are **audit recommendations only**; approving the direction does not yet authorize implementation.
+
+**Authority and compatibility:** Main `spec/tisc-spec.md` identifies itself as normative, but opcode reference text within `/spec` contradicts it. Apply [spec drift policy](../governance/SPEC_DRIFT_POLICY.md) and [freeze enforcement](../governance/FREEZE_ENFORCEMENT.md). Changing memory/branch state transitions is a breaking-change/RFC question, even if framed as correcting implementation. No compiler, LLVM/MLIR, VM, freestanding evaluator, or existing binary may silently switch profiles. Artifact-bound explicit profile selection is required because the 13-byte instruction encoding has no semantic-version field.
+
+**Integration gate:** PR #710 is merged only into `experiment/cpa005-integration-base` (result `514fa17cf5629a7aea9ebb1b035f01f3ef7687f3`), carrying CPA-004 content plus CPA-006 additions. PR #709 remains open draft, PR #707 remains open. Integrate a single cumulative CPA-004/006 candidate if subsequently authorized; avoid double-applying #709 and the cumulative branch. Review #707 independently. No merge or production activation is authorized by this document.
+
+**Next decision record:** A separate versioned TISC state-transition RFC must specify exact operand roles, target units, predicate flags, tags, PC progression, fault ordering, opcode admission and migration rules; obtain explicit maintainer approval before code changes. Preserve historical CPA evidence, negative controls and source identities unchanged. This non-normative index is not itself an RFC or acceptance record.

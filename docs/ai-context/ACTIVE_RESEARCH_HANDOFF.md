@@ -239,66 +239,69 @@ A follows pinned baseline `f775680aba7db200691c0f4e2a3174b0e7e51581`; B reported
 
 ---
 
-## 2026-11-04 handoff delta — BASE-01, CanonFS portability, and T81-SIA-001 audit
+## 2026-11-05 CPA-001 through CPA-005 Research Handoff & Architecture Baseline
 
-**Session Date:** 2026-11-04
-**Audited Head SHA:** `d836f7edb9b70608ef7476e82e98a0a89084d74b` on `main`
-**Authoritative Baseline Head for Audit:** `9bbc4453ca136251448201cf9166c2bd167e1f67`
+### 1. Established Reality: Bounded Cross-Profile Implementation Works
+**Future AI research agents must NOT be asked to re-establish or re-verify whether the bounded cross-profile implementation works.**
+The CPA-004 experimental campaign established that:
+- The 351-byte canonical program (SHA-256 `b0649777...`) executes across 24 instructions and halts deterministically (PC=27, SP=283).
+- Hosted T81VM and freestanding Axion OS (AArch64 QEMU post-`ExitBootServices`) match the separately derived mathematical oracle at **all 25 observation boundaries** across registers, memory words, flags, and system registers.
+- All checks pass cleanly under `NDEBUG` on the tested snapshot base `803075e9f7e36ed4b5318a8d2ddaacf62ae0a7e4` (committed in `origin/experiment/cpa004-freestanding` at `b803bf916a1b1e44129f3a07abf96fa6103c51fc`).
 
-### 1. Completed & Integrated Engineering
-- **BASE-01 Reference Baseline Integration:**
-  - PR #694 (`52921bd0`) and PR #695 (`4f9edb9c`) successfully integrated 126 non-colliding files across Lane A, B1 Foundation, and resource accounting without modifying existing repository files or triggering benchmark workflows.
-  - PR #700 (`63d87633`) preserved Release correctness guards (`tests/cpp/release_correctness_guard.cpp`), MSVC Debug optimization rules, and test portability across Linux and Windows.
-  - Review evidence under `docs/research/base01/evidence/` retains byte-for-byte identity; virtualized test suite passed 58/63 with 5 skipped.
-- **CanonFS Storage Portability Initial Merge:**
-  - PR #701 (`9bbc4453`) resolved Windows filesystem reserved-character failures by separating canonical public Base-81 IDs from physical on-disk keys (`storage_key_v1` generating `h1-<hex>` names for objects and capabilities).
-  - Enforced fail-closed refusal of unmigrated legacy files and added VM MetaRefine WriteCode denial protection.
-- **EXP-H04-R03 Candidate A (B729-µ5):**
-  - PR #679 (`d8e1376a`) merged Candidate A codec; PR #680 (`927972f8`) merged acceptance review. Phase C performance measurement remains frozen.
+### 2. What Remains Unproven & Active Research Questions
+1. **Full ISA Conformance:** CPA-004 covers an admitted subset of 17 instructions on signed 64-bit integer values and scalar trits. It does not validate arbitrary big integers, floating point, fraction, vector/tensor operations, or the remaining 157+ opcodes.
+2. **Four Preserved Normative Discrepancies:**
+   - *Memory addressing:* Direct immediate address in implementation/semantics vs register-indirect `R[RS]` in `spec/tisc-spec.md`.
+   - *Branch target & condition:* Direct target + R[B] zero-testing in implementation/semantics vs register-indirect + FLAGS in `spec/tisc-spec.md`.
+   - *TXor interpretation:* Wrapped balanced difference `((lhs - rhs + 1) % 3) - 1` vs ambiguous "Sum" label.
+   - *Opcode inventories:* 174 capability-frozen opcodes vs 209 registry entries vs 244 named C++ header opcodes (with undefined opcodes 221–223 and 247–255).
+   *Directive:* Preserve these discrepancies; do not silently normalize or resolve them without explicit RFC approval.
+3. **Comparative Advantage:** Execution correctness across dual profiles is an engineering milestone (Track F). It does **not** prove ternary superiority (Track R). H01–H08 remain open research questions requiring matched, rigorous binary controls.
 
-### 2. Active Engineering Workstreams
-- **PR #702 (`origin/fix/canonfs-cli-list-portable-key` at `41f95d4c`):**
-  - Canonical Reference Resolution: decodes portable on-disk `h1-<hex>` filenames back into canonical public Base-81 identifiers for CLI `list-objects` and `read-object` operations.
-  - Subprocess Regressions: adds native CLI round-trip test coverage in CTest via `tests/python/test_canonfs_cli_portable_storage.py` and updates `cli_contract_test.cpp`.
-- **PR #703 (`origin/fix/canonfs-portable-snapshot-paths` at `991f3169`):**
-  - Snapshot Portability: maps snapshot directory paths from raw Base-81 strings to portable `h1-<hex>` directory keys (`snapshot_storage_key_v1`) in `driver.cpp`.
-  - Snapshot Resolvers & Lifecycle Tests: unifies snapshot path lookup across `driver.cpp` and `main.cpp`, asserting that public snapshot IDs and manifest contents remain Base-81 while directories on disk are safe on Windows.
-- **BASE-01 B1 Contract Reconciliation (`audit/base01-b1-contract-reconciliation` at `7f42e2b8` / `8c9e2c7f`):**
-  - Proposes resolving Codex P0/P1 audit findings (100 MiB vs 16 MiB child output ceiling, write-batch first-insertion fractions) prior to any dynamic host qualification.
+### 3. Current Git & PR Status
+- Pinned test base: `803075e9f7e36ed4b5318a8d2ddaacf62ae0a7e4`.
+- Current `main`: `ea6d031a8117341fe03013cc9d5473de1b07727d`.
+- PR #709: **Open draft PR (unmerged)**; head `b803bf916a1b1e44129f3a07abf96fa6103c51fc` (`experiment/cpa004-freestanding`), base `ea6d031a8117341fe03013cc9d5473de1b07727d`.
+- CPA-005 baseline: pinned on `origin/experiment/cpa005-integration-base` (commit `f7e089590020508077607580da271b6570fa8f60`, integrated tree `70734fd5bcfe06978cea13b4d2d595d4dda71a12`).
+- PR #707: Open unmerged PR (CPA-002 opcode conformance repairs).
+- Working branch: Must preserve tested boundaries and avoid unauthorized merge operations.
 
-### 3. New Major Investigation: T81-SIA-001 (End-to-End System Integration Audit)
-Under maintainer authorization, a comprehensive read-only systems integration audit was completed and published across eight canonical reports under `docs/reports/audit/`:
-- `T81_SYSTEM_INTEGRATION_AUDIT.md`: Subsystem maturity overview.
-- `T81_BOOT_EXECUTION_TRACE.md`: Complete firmware-to-kernel boot trace on x86-64 and AArch64.
-- `T81_APPLICATION_LIFECYCLE_MATRIX.md`: Hosted vs freestanding application lifecycles.
-- `T81_SUBSYSTEM_DEPENDENCY_MAP.md`: Call graph and coupling analysis across 13 subsystems.
-- `T81_OS_CAPABILITY_MATRIX.md`: 18-point capability evaluation against conventional operating systems.
-- `T81_INTEGRATION_GAP_REGISTER.md`: Prioritized register of engineering gaps.
-- `T81_VALIDATION_EVIDENCE.md`: Reproducible build commands, test results, logs, and empirical evidence.
-- `T81_SYSTEM_READINESS_VERDICT.md`: Formal dispositions and 5-milestone roadmap.
+### 4. Primary Next Actions for Incoming Agents
+1. Treat bounded dual-profile TISC execution as an established foundation; build on it rather than re-litigating it.
+2. Advance the resolution of the four normative ISA discrepancies via formal specification drafts and maintainer review.
+3. Advance Track R comparative hypotheses (e.g., H04-R03 Candidate A Phase C gates, BASE-01 physical Linux prerequisites) without conflating software emulation correctness with physical hardware advantage.
 
-### 4. Direct Answers to Core Research Continuity Questions
+---
 
-1. **Which subsystems execute inside freestanding Axion OS?**
-   Only the low-level microkernel facilities under `ternaryos/`: UEFI boot handoff, PL011/COM1 UART drivers, GICv3 interrupt distributor, physical timer PPIs, virtio-blk modern MMIO/PCI driver, and TTBR0 MMU page table management.
-2. **Can T81Lang/TISC programs execute independently after boot?**
-   **No.** Freestanding Axion OS does not embed the TISC virtual machine, does not include a bytecode interpreter or JIT, and has no T81Lang runtime or compiler.
-3. **Are Axion policy and CanonFS integrated into the freestanding lifecycle?**
-   **No.** Axion compile-time/runtime policy bundles (`.axionb`) and CanonFS content-addressed stores are currently integrated only within the hosted CLI and T81VM on conventional host OSes. Axion OS accesses disk blocks purely via hardcoded LBA sectors without dynamic CanonFS superblock or policy evaluation.
-4. **Can an application persist output, restart, and verify its artifacts?**
-   - **Hosted Mode:** **Yes.** A T81Lang application can compile to TISC, execute, persist objects and snapshots to CanonFS, restart, and verify byte-for-byte SHA3-256/SHA3-512 cryptographic integrity.
-   - **Freestanding Mode:** **No.** Freestanding tasks can only issue raw sector write commands to virtio-blk.
-5. **Which functionality still depends on a conventional host operating system?**
-   The entire development and application lifecycle: source code editing, lexing/parsing/compiling with `t81lang`, TISC bytecode verification and execution in `t81vm`, policy profiling, model intake bridging, Python bindings, and CI regression suites.
-6. **What useful capability does the integrated platform demonstrate independently of ternary-specific performance?**
-   T81 demonstrates a cohesive model of **verifiable, policy-governed deterministic computing**: bit-exact software execution across x86-64/ARM64/Windows, fail-closed access authorization before state mutation, and tamper-evident content-addressed storage. These properties are valuable for high-assurance, auditable computing regardless of whether native ternary hardware is ever deployed.
+## 2026-11-05 CURRENT HANDOFF — CPA-006 complete; ISA-001 awaiting maintainer decision
 
-### 5. Next Concrete Engineering and Research Decision Gates
-1. **Gate 1 (P0): Complete CanonFS Portability Integration:**
-   Finalize and merge PR #702 (canonical reference listings) and PR #703 (snapshot directory keys), verifying cross-platform CTest suites on Linux and Windows.
-2. **Gate 2 (P0 Milestone 1): Embed TISC Runtime into Axion OS:**
-   Port a lightweight, zero-allocation TISC interpreter into `ternaryos/`, enabling the freestanding kernel to load and execute compiled `.tisc` bytecode from disk on bare metal.
-3. **Gate 3 (P1): Resolve BASE-01 B1 Protocol Findings:**
-   Reconcile the CanonFS 100 MiB vs 16 MiB retention ceiling and batch size fractions in `BASE01_B1_MEASUREMENT_CONTRACT.md` before scheduling physical Linux host qualification.
-4. **Gate 4 (Freeze Enforced): Maintain Phase C & PMU Execution Freezes:**
-   Keep EXP-H04-R03 Phase C and BASE-01 B1 benchmarking strictly frozen until dedicated bare-metal hardware and signed maintainer authorization are secured.
+**This is the newest operational handoff.** It supersedes earlier *current-status and next-action* sections, while preserving their historical reports and source pins.
+
+### Established and bounded
+- T81's implemented historical TISC profile has a working hosted T81VM and separate freestanding AArch64 QEMU evaluator after `ExitBootServices`. CPA-004/005: canonical 351-byte program, 24 executed instructions, 25 matching observation boundaries.
+- CPA-006: **PASS — BOUNDED CONFORMANCE** for 19/19 frozen-oracle cases; 57 hosted runs and 57 fresh QEMU boots; 1,190 validated state records; Halt, runtime trap, admission rejection and budget exhaustion. See [committed acceptance report](https://github.com/t81dev/t81-foundation/blob/514fa17cf5629a7aea9ebb1b035f01f3ef7687f3/experiments/cpa006/README.md). Do not claim full ISA conformance, independent-person replication, a complete OS or ternary-vs-binary performance advantage.
+- ISA-001: read-only source/lineage and normative-vs-implemented audit, **READY FOR MAINTAINER DECISION**. No implementation changes or new conformance executions. Its recommended normative interpretation is *not approved*.
+
+### Pinned GitHub integration snapshot (2026-11-05)
+| Surface | Observed identity and status |
+|---|---|
+| `main` | `7afa4f1a424be6c65fab28f8e5bcf4fddc3ef762` (PR #711 continuity refresh merged) |
+| PR #707 | Open, independent opcode matrix test repair; head `55223cbd3ee29b5391e151197fe6eee1b8889452` |
+| PR #709 | Open draft CPA-004 evaluator; head `b803bf916a1b1e44129f3a07abf96fa6103c51fc` |
+| CPA-005 integration snapshot | `f7e089590020508077607580da271b6570fa8f60`, tree `70734fd5bcfe06978cea13b4d2d595d4dda71a12` |
+| PR #710 | Merged into **experimental integration branch, not main**; merged result `514fa17cf5629a7aea9ebb1b035f01f3ef7687f3`, tree `f8f01f58901bfd9a57446a97df98bb8d481da022` |
+
+### Outstanding semantic decisions
+1. Direct-address implemented memory vs normative register-indirect memory.
+2. Immediate target / register-tested JZ/JNZ vs normative register-target / FLAGS branch semantics; LLVM/MLIR lowering diverges as well.
+3. Scalar TXor implemented wrapped difference vs ambiguous documentary 'XOR / Sum'.
+4. Core freeze 0–173, registry/header extension assignments and TVecSub/SWAR collisions.
+**No recommendation is accepted by implication.** Preserve historical CPA binaries and evidence; do not reinterpret raw 13-byte records without artifact-bound version selection.
+
+### Primary next action — T81-ISA-002 (documentation and maintainer review only)
+Draft a **versioned authoritative TISC state-transition RFC** with exact operands, tags, FLAGS, PC, traps, side-effect ordering, opcode manifests, profile selection and migration consequences. Present decision points and obtain explicit maintainer approval. Do not change production VM, freestanding evaluator, compiler lowering, tests, frozen CPA artifacts, or branches as part of the RFC drafting task.
+
+**After approval only:** authorize discriminating successor conformance tests and one cumulative main-integration candidate (CPA-004 + CPA-006; handle #707 separately). Then consider a separately preregistered H02 signed-rounding comparison with optimized binary and representation-conversion controls.
+
+### Handoff rules
+Do not restart feasibility experiments, silently resolve the spec, claim merged-to-main status from PR #710, overwrite negative research, or confuse verified content hashes with independently replicated execution. Refresh GitHub PR tips and main before any subsequent action.
